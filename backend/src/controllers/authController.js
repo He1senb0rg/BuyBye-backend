@@ -1,18 +1,20 @@
-const User = require('../models/User');
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
+import User from '../models/User.js';
+import pkg from 'jsonwebtoken';
+const { sign } = pkg;
+import pkg2 from 'bcryptjs';
+const { compare, hash } = pkg2;
 
 // Registrar novo usuário
-exports.register = async (req, res) => {
+export async function register(req, res) {
   try {
     const { name, email, password, tipo } = req.body;
     
-    const userExists = await User.findOne({ email });
+    const userExists = await findOne({ email });
     if (userExists) {
       return res.status(400).json({ error: 'Email já está em uso' });
     }
 
-    const user = await User.create({ name, email, password, tipo });
+    const user = await create({ name, email, password, tipo });
     
     // Remove a senha do retorno
     user.password = undefined;
@@ -21,24 +23,24 @@ exports.register = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
 
 // Login do usuário
-exports.login = async (req, res) => {
+export async function login(req, res) {
   try {
     const { email, password } = req.body;
     
-    const user = await User.findOne({ email }).select('+password');
+    const user = await findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = await compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
 
-    const token = jwt.sign(
+    const token = sign(
       { id: user._id, tipo: user.tipo },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
@@ -48,4 +50,4 @@ exports.login = async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
-};
+}
