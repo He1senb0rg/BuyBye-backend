@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
+import productRoutes from './routes/productRoutes.js';
 
 const app = express();
 
@@ -46,6 +47,7 @@ app.get('/', (req, res) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
