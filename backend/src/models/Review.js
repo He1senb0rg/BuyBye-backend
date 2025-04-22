@@ -1,8 +1,13 @@
 import { Schema, model } from 'mongoose';
 
 const ReviewSchema = new Schema({
+    product: {
+        type: Schema.Types.ObjectId,
+        ref: 'Product',
+        required: true,
+    },
     user: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
     },

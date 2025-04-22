@@ -7,6 +7,7 @@ import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
 
 const app = express();
 
@@ -36,10 +37,24 @@ connect(process.env.MONGO_URI, {
 // Rota raiz
 app.get('/', (req, res) => {
   res.json({
-    message: 'Bem-vindo à API de autenticação',
+    message: 'Bem-vindo à API da BuyBye!',
     endpoints: {
       register: 'POST /api/auth/register',
-      login: 'POST /api/auth/login'
+      login: 'POST /api/auth/login',
+      products: {
+        all: 'GET /api/products',
+        byId: 'GET /api/products/:id',
+        create: 'POST /api/products',
+        update: 'PUT /api/products/:id',
+        delete: 'DELETE /api/products/:id'
+      },
+      reviews: {
+        all: 'GET /api/reviews',
+        byId: 'GET /api/reviews/:id',
+        create: 'POST /api/reviews',
+        update: 'PUT /api/reviews/:id',
+        delete: 'DELETE /api/reviews/:id'
+      }
     }
   });
 });
@@ -48,6 +63,7 @@ app.get('/', (req, res) => {
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
