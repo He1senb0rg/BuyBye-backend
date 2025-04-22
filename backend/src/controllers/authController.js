@@ -7,14 +7,14 @@ const { compare, hash } = pkg2;
 // Registrar novo usuário
 export async function register(req, res) {
   try {
-    const { name, email, password, tipo } = req.body;
+    const { name, email, password, role } = req.body;
     
-    const userExists = await findOne({ email });
+    const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ error: 'Email já está em uso' });
     }
 
-    const user = await create({ name, email, password, tipo });
+    const user = await User.create({ name, email, password, role });
     
     // Remove a senha do retorno
     user.password = undefined;
@@ -30,7 +30,7 @@ export async function login(req, res) {
   try {
     const { email, password } = req.body;
     
-    const user = await findOne({ email }).select('+password');
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       return res.status(401).json({ error: 'Credenciais inválidas' });
     }
@@ -41,12 +41,12 @@ export async function login(req, res) {
     }
 
     const token = sign(
-      { id: user._id, tipo: user.tipo },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
 
-    res.json({ token, user: { id: user._id, name: user.name, email: user.email, tipo: user.tipo } });
+    res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
