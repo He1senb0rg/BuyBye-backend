@@ -10,7 +10,7 @@ import {
   getUserReviewForProduct,
   updateReview,
   deleteReview,
-  getProductRating
+  getReviewStatsByProduct
 } from '../controllers/reviewController.js';
 
 
@@ -22,6 +22,6 @@ router.get('/user/:id', getAllUserReviews);
 router.get('/user/:userId/product/:productId', getUserReviewForProduct);
 router.put('/:id', updateReview);
 router.delete('/:id', deleteReview);
-router.get('/product/:id/rating', getProductRating);
+router.get('/product/:id/stats', getReviewStatsByProduct);
 
 export default router;
