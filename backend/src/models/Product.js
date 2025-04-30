@@ -1,5 +1,23 @@
 import { Schema, model } from 'mongoose';
 
+const DiscountSchema = new Schema({
+    type: {
+      type: String,
+      enum: ['percentage', 'fixed'],
+      required: true
+    },
+    value: {
+      type: Number,
+      required: true
+    },
+    start_date: {
+      type: Date,
+    },
+    end_date: {
+      type: Date,
+    }
+  }, { _id: false });
+
 const ProductSchema = new Schema({
     name: {
         type: String,
@@ -12,6 +30,10 @@ const ProductSchema = new Schema({
         type: Number,
         required: true,
     },
+    discount: {
+        type: DiscountSchema,
+        default: null
+      },
     stock: {
         type: Number,
         required: true,
@@ -22,6 +44,10 @@ const ProductSchema = new Schema({
             ref: 'Review'
         }
     ],
+    averageRating: {
+        type: Number,
+        default: 0
+    },
     category: [
         {
             type: Schema.Types.ObjectId,

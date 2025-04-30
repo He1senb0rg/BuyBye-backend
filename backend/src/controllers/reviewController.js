@@ -1,5 +1,7 @@
 import Review from '../models/Review.js';
 import Product from '../models/Product.js';
+import { updateProductRating } from '../utils/updateProductRating.js';
+import mongoose from 'mongoose';
 
 // Criar uma nova avaliação
 export const createReview = async (req, res) => {
@@ -24,6 +26,10 @@ export const createReview = async (req, res) => {
         // Adiciona a avaliação ao produto
         product.reviews.push(review._id);
         await product.save();
+
+        // Atualiza a classificação média do produto
+        await updateProductRating(productId);
+
         res.status(201).json(review);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -84,6 +90,10 @@ export const updateReview = async (req, res) => {
         if (!updated) {
             return res.status(404).json({ message: 'Avaliação não encontrada' });
         }
+
+        // Atualiza a classificação média do produto
+        await updateProductRating(updated.product._id);
+
         res.json(updated);
     }
     catch (error) {
@@ -98,6 +108,10 @@ export const deleteReview = async (req, res) => {
         if (!product) {
             return res.status(404).json({ message: 'Avaliação não encontrada' });
         }
+
+        // Atualiza a classificação média do produto
+        await updateProductRating(product.product._id);
+
         res.json({ message: 'Avaliação apagada com sucesso' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -118,18 +132,43 @@ export const getUserReviewForProduct = async (req, res) => {
     }
 }
 
-// Obter média de avaliações de um produto
-export const getProductRating = async (req, res) => {
+// Obter estatísticas de avaliações por produto
+export const getReviewStatsByProduct = async (req, res) => {
     try {
-        const { productId } = req.params;
-        const reviews = await Review.find({ product: productId });
-        if (reviews.length === 0) {
-            return res.status(404).json({ message: 'Nenhuma avaliação encontrada para este produto' });
-        }
-        const totalRating = reviews.reduce((acc, review) => acc + review.rating, 1);
-        const averageRating = totalRating / reviews.length;
-        res.json({ averageRating });
+      const { id } = req.params;
+  
+      const stats = await Review.aggregate([
+        {
+          $match: {
+            product: new mongoose.Types.ObjectId(id),
+          },
+        },
+        {
+          $group: {
+            _id: '$rating',
+            count: { $sum: 1 },
+          },
+        },
+        {
+          $sort: { _id: -1 },
+        },
+      ]);
+  
+      // Inicializa todos os valores de 1 a 5 com 0
+      const result = {
+        5: 0,
+        4: 0,
+        3: 0,
+        2: 0,
+        1: 0,
+      };
+  
+      stats.forEach((item) => {
+        result[item._id] = item.count;
+      });
+  
+      res.json(result);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+      res.status(500).json({ error: error.message });
     }
-}
+  };
