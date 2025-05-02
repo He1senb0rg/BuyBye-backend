@@ -67,12 +67,12 @@ const ProductSchema = new Schema({
     type: Number,
     default: 0,
   },
-  category: [
+  category: 
     {
       type: Schema.Types.ObjectId,
       ref: "Category",
     },
-  ],
+  
   images: [
     {
       type: String,

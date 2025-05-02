@@ -3,7 +3,9 @@ import Product from '../models/Product.js';
 // Criar um novo produto
 export async function createProduct(req, res) {
     try {
-        const product = await Product.create( req.body, { averageRating: 0 });
+         const { name, description, price, stock, category, images } = req.body;
+
+        const product = await Product.create({ name, description, price, stock, category, images, averageRating: 0 });
 
         res.status(201).json({ product });
     } catch (error) {
