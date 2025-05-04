@@ -26,6 +26,7 @@ export const getAllCategories = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
     const sortOption = req.query.sort;
+    const search = req.query.search || "";
 
     let sortBy = {};
     switch (sortOption) {
@@ -45,7 +46,12 @@ export const getAllCategories = async (req, res) => {
         sortBy = { createdAt: -1 };
     }
 
-    const categories = await Category.find().sort(sortBy).skip(skip).limit(limit);
+    const categories = await Category.find({
+      name: { $regex: search, $options: "i" },
+    })
+      .sort(sortBy)
+      .skip(skip)
+      .limit(limit);
     res.json(categories);
   } catch (error) {
     res.status(500).json({ error: error.message });
