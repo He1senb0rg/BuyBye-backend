@@ -3,7 +3,7 @@ import Category from "../models/Category.js";
 // Criar uma nova categoria
 export const createCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     // Verifica se a categoria já existe
     const existingCategory = await Category.findOne({ name });
@@ -11,7 +11,7 @@ export const createCategory = async (req, res) => {
       return res.status(400).json({ message: "Categoria já existe" });
     }
 
-    const category = await Category.create({ name });
+    const category = await Category.create({ name, description });
 
     res.status(201).json(category);
   } catch (error) {
@@ -22,7 +22,30 @@ export const createCategory = async (req, res) => {
 // Obter todas as categorias
 export const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find();
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const sortOption = req.query.sort;
+
+    let sortBy = {};
+    switch (sortOption) {
+      case "nome_az":
+        sortBy = { name: 1 };
+        break;
+      case "nome_za":
+        sortBy = { name: -1 };
+        break;
+      case "mais_recente":
+        sortBy = { createdAt: -1 };
+        break;
+      case "mais_antigo":
+        sortBy = { createdAt: 1 };
+        break;
+      default:
+        sortBy = { createdAt: -1 };
+    }
+
+    const categories = await Category.find().sort(sortBy).skip(skip).limit(limit);
     res.json(categories);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -45,10 +68,13 @@ export const getCategoryById = async (req, res) => {
 // Atualizar categoria
 export const updateCategory = async (req, res) => {
   try {
-    const { name } = req.body;
+    const { name, description } = req.body;
 
     // Verifica se a categoria já existe
-    const existingCategory = await Category.findOne({ name });
+    const existingCategory = await Category.findOne({
+      name,
+      _id: { $ne: req.params.id },
+    });
     if (existingCategory) {
       return res.status(400).json({ message: "Categoria já existe" });
     }
