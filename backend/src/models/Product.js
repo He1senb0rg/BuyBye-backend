@@ -71,6 +71,7 @@ const ProductSchema = new Schema({
     {
       type: Schema.Types.ObjectId,
       ref: "Category",
+      required: false,
     },
   
   images: [
