@@ -52,7 +52,11 @@ export const getAllCategories = async (req, res) => {
       .sort(sortBy)
       .skip(skip)
       .limit(limit);
-    res.json(categories);
+
+    const totalCategories = await Category.countDocuments({
+      name: { $regex: search, $options: "i" },
+    });
+    res.json({categories, totalCategories});
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
