@@ -8,6 +8,7 @@ import cors from 'cors';
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
+import cartRoutes from './routes/cart.routes.js';
 
 const app = express();
 
@@ -54,6 +55,13 @@ app.get('/', (req, res) => {
         create: 'POST /api/reviews',
         update: 'PUT /api/reviews/:id',
         delete: 'DELETE /api/reviews/:id'
+      },
+      cart: {
+        getCart: 'GET /api/cart',
+        addItem: 'POST /api/cart',
+        updateItem: 'PUT /api/cart/:productId',
+        removeItem: 'DELETE /api/cart/:productId',
+        clearCart: 'DELETE /api/cart'
       }
     }
   });
@@ -64,6 +72,7 @@ app.get('/', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/cart', cartRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
