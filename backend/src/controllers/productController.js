@@ -35,10 +35,13 @@ export const getProductById = async (req, res) => {
                 path: 'user',
                 select: 'name'
             }
-        });;
+        });
         if (!product) {
             return res.status(404).json({ message: 'Produto não encontrado' });
         }
+        
+        product.reviews.sort((a, b) => b.createdAt - a.createdAt);
+
         res.json(product);
     } catch (error) {
         res.status(500).json({ error: error.message });
