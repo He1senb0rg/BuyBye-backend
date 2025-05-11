@@ -83,7 +83,7 @@ export const updateCartItem = async (req, res) => {
   
       if (quantity !== undefined) {
         if (quantity > product.stock) {
-          return res.status(400).json({ message: `Estoque insuficiente. Máximo: ${product.stock}` });
+          return res.status(400).json({ message: `Stock insuficiente. Máximo: ${product.stock}` });
         }
         item.quantity = quantity;
       }
