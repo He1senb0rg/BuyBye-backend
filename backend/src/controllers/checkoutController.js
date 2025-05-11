@@ -20,8 +20,11 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
-    // Fetch product details and calculate total amount
-    const products = await Product.find({ '_id': { $in: cart.items.map(item => item.product) } });
+    // Fetch product details
+    const products = await Product.find({
+      _id: { $in: cart.items.map(item => item.product) },
+    });
+
     if (!products.length) {
       return res.status(400).json({ message: 'Products not found' });
     }
@@ -62,5 +65,21 @@ export const createOrder = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Error creating order' });
+  }
+};
+
+// Fetch billing history for a logged-in user
+export const getBillingHistory = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const orders = await Order.find({ user: userId })
+      .sort({ createdAt: -1 })
+      .populate('items.product', 'name image price');
+
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao buscar histórico de faturação.' });
   }
 };
