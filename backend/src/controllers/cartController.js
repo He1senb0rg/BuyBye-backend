@@ -35,7 +35,7 @@ export const addToCart = async (req, res) => {
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
         if (newQuantity > product.stock) {
-          return res.status(400).json({ message: `Quantidade excede o estoque disponível (${product.stock}).` });
+          return res.status(400).json({ message: `Quantidade excede o stock disponível (${product.stock}).` });
         }
         existingItem.quantity = newQuantity;
       } else {

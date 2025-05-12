@@ -1,7 +1,5 @@
-// models/Wishlist.js
 import { Schema, model } from 'mongoose';
 
-// Schema for individual wishlist items
 const WishlistItemSchema = new Schema({
   product: {
     type: Schema.Types.ObjectId,
@@ -14,7 +12,6 @@ const WishlistItemSchema = new Schema({
   },
 });
 
-// Wishlist schema which contains multiple wishlist items
 const WishlistSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,

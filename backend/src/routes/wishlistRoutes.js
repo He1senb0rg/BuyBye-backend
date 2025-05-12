@@ -11,13 +11,8 @@ const router = express.Router();
 // Protect all routes
 router.use(protect);
 
-// Add a product to the wishlist
 router.post('/add', addToWishlist);
-
-// Remove a product from the wishlist
-router.delete('/remove', removeFromWishlist);
-
-// Get all products in the wishlist
-router.get('/', getWishlist); // No need for :userId here
+router.delete('/remove:productId', removeFromWishlist);
+router.get('/', getWishlist);
 
 export default router;
