@@ -1,4 +1,3 @@
-// controllers/checkoutController.js
 import User from '../models/User.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
@@ -6,7 +5,12 @@ import Order from '../models/Order.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, paymentMethod, shippingAddress, amount } = req.body;
+    const { userId, paymentMethod, shippingAddress } = req.body;
+
+    // Validate request data
+    if (!paymentMethod || !shippingAddress) {
+      return res.status(400).json({ message: 'Payment method and shipping address are required.' });
+    }
 
     // Fetch user details
     const user = await User.findById(userId);
@@ -20,7 +24,7 @@ export const createOrder = async (req, res) => {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
-    // Fetch product details
+    // Fetch product details and check stock
     const products = await Product.find({
       _id: { $in: cart.items.map(item => item.product) },
     });
@@ -31,6 +35,12 @@ export const createOrder = async (req, res) => {
 
     const items = cart.items.map(item => {
       const product = products.find(p => p._id.toString() === item.product.toString());
+
+      // Check if the product is in stock
+      if (product.stock < item.quantity) {
+        return res.status(400).json({ message: `Not enough stock for product: ${product.name}` });
+      }
+
       return {
         product: product._id,
         quantity: item.quantity,
@@ -50,9 +60,19 @@ export const createOrder = async (req, res) => {
       totalAmount,
       shippingAddress,
       paymentMethod,
+      status: 'pending',  // Adding order status for tracking
     });
 
     await order.save();
+
+    // Optional: Update product stock after order is placed (if you're tracking stock)
+    await Promise.all(
+      items.map(async (item) => {
+        const product = await Product.findById(item.product);
+        product.stock -= item.quantity;  // Decrease stock
+        await product.save();
+      })
+    );
 
     // Optional: Clear the cart after placing the order
     await Cart.deleteOne({ user: userId });
@@ -61,6 +81,7 @@ export const createOrder = async (req, res) => {
       message: 'Order created successfully',
       orderId: order._id,
       totalAmount,
+      items: order.items,
     });
   } catch (err) {
     console.error(err);
@@ -77,9 +98,13 @@ export const getBillingHistory = async (req, res) => {
       .sort({ createdAt: -1 })
       .populate('items.product', 'name image price');
 
+    if (!orders.length) {
+      return res.status(404).json({ message: 'No orders found' });
+    }
+
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Erro ao buscar histórico de faturação.' });
+    res.status(500).json({ message: 'Error fetching billing history.' });
   }
 };
