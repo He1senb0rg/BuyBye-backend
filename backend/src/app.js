@@ -73,7 +73,8 @@ app.get('/', (req, res) => {
         delete: 'DELETE /api/categories/:id'
       },
       checkout: {
-        createOrder: 'POST /api/checkout'  // Add checkout endpoint here
+        createOrder: 'POST /api/checkout',
+        getBillingHistory: 'GET /api/checkout/billing-history'
       }
     }
   });
