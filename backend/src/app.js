@@ -10,6 +10,7 @@ import productRoutes from './routes/productRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
+import checkoutRoutes from './routes/checkoutRoutes.js';
 
 const app = express();
 
@@ -59,10 +60,11 @@ app.get('/', (req, res) => {
       },
       cart: {
         getCart: 'GET /api/cart',
-        addItem: 'POST /api/cart',
-        updateItem: 'PUT /api/cart/:productId',
-        removeItem: 'DELETE /api/cart/:productId',
-        clearCart: 'DELETE /api/cart'
+        addItem: 'POST /api/cart/add',
+        updateItem: 'PUT /api/cart/update/:productId',
+        removeItem: 'DELETE /api/cart/remove/:productId',
+        clearCart: 'DELETE /api/cart',
+        updateCartItemStatus: 'PUT /api/cart/item/:productId/status'
       },
       categories: {
         all: 'GET /api/categories',
@@ -70,6 +72,10 @@ app.get('/', (req, res) => {
         create: 'POST /api/categories',
         update: 'PUT /api/categories/:id',
         delete: 'DELETE /api/categories/:id'
+      },
+      checkout: {
+        createOrder: 'POST /api/checkout',
+        getBillingHistory: 'GET /api/checkout/billing-history'
       }
     }
   });
@@ -82,6 +88,7 @@ app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
