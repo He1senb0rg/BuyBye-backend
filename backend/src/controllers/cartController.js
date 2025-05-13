@@ -35,7 +35,7 @@ export const addToCart = async (req, res) => {
       if (existingItem) {
         const newQuantity = existingItem.quantity + quantity;
         if (newQuantity > product.stock) {
-          return res.status(400).json({ message: `Quantidade excede o estoque disponível (${product.stock}).` });
+          return res.status(400).json({ message: `Quantidade excede o stock disponível (${product.stock}).` });
         }
         existingItem.quantity = newQuantity;
       } else {
@@ -97,3 +97,51 @@ export const updateCartItem = async (req, res) => {
       res.status(500).json({ message: "Erro ao atualizar item do carrinho.", error });
     }
   };
+
+  // Clear entire cart
+export const clearCart = async (req, res) => {
+  try {
+    const cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) return res.status(404).json({ message: "Carrinho não encontrado." });
+
+    cart.items = [];
+    cart.updatedAt = Date.now();
+    await cart.save();
+
+    res.status(200).json({ message: "Carrinho limpo com sucesso.", cart });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao limpar o carrinho.", error });
+  }
+};
+
+  // Update item status (e.g., saved, active, removed)
+export const updateCartItemStatus = async (req, res) => {
+  const { productId } = req.params;
+  const { status } = req.body;
+
+  const allowedStatuses = ['active', 'saved', 'removed'];
+
+  if (!allowedStatuses.includes(status)) {
+    return res.status(400).json({ message: `Status inválido. Permitidos: ${allowedStatuses.join(', ')}` });
+  }
+
+  try {
+    const cart = await Cart.findOne({ user: req.user.id });
+    if (!cart) {
+      return res.status(404).json({ message: "Carrinho não encontrado." });
+    }
+
+    const item = cart.items.find((i) => i.product.toString() === productId);
+    if (!item) {
+      return res.status(404).json({ message: "Item não encontrado no carrinho." });
+    }
+
+    item.status = status;
+    cart.updatedAt = Date.now();
+    await cart.save();
+
+    res.status(200).json({ message: 'Status atualizado com sucesso.', cart });
+  } catch (error) {
+    res.status(500).json({ message: "Erro ao atualizar o status do item.", error });
+  }
+};

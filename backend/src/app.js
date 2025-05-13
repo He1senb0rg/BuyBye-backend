@@ -19,25 +19,23 @@ app.use(cors());
 app.use(json());
 app.use(morgan('dev'));
 
-
-// Conexão com o MongoDB
+// MongoDB Connection
 connect(process.env.MONGO_URI, {
   auth: {
     username: process.env.MONGO_USER,
-    password: process.env.MONGO_PASSWORD
+    password: process.env.MONGO_PASSWORD,
   },
   authSource: "auth_db",
   retryWrites: true,
-  w: "majority"
+  w: "majority",
 })
-.then(() => console.log('Conectado ao MongoDB com sucesso!'))
-.catch(err => {
-  console.error('Erro na conexão com MongoDB:', err.message);
-  console.error('Stack trace:', err.stack);
-});
+  .then(() => console.log('Conectado ao MongoDB com sucesso!'))
+  .catch(err => {
+    console.error('Erro na conexão com MongoDB:', err.message);
+    console.error('Stack trace:', err.stack);
+  });
 
-  
-// Rota raiz
+// Root route with API reference
 app.get('/', (req, res) => {
   res.json({
     message: 'Bem-vindo à API da BuyBye!',
@@ -60,10 +58,11 @@ app.get('/', (req, res) => {
       },
       cart: {
         getCart: 'GET /api/cart',
-        addItem: 'POST /api/cart',
-        updateItem: 'PUT /api/cart/:productId',
-        removeItem: 'DELETE /api/cart/:productId',
-        clearCart: 'DELETE /api/cart'
+        addItem: 'POST /api/cart/add',
+        updateItem: 'PUT /api/cart/update/:productId',
+        removeItem: 'DELETE /api/cart/remove/:productId',
+        clearCart: 'DELETE /api/cart',
+        updateCartItemStatus: 'PUT /api/cart/item/:productId/status'
       },
       categories: {
         all: 'GET /api/categories',
@@ -80,8 +79,7 @@ app.get('/', (req, res) => {
   });
 });
 
-
-// Rotas da API
+//Rotas de API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
