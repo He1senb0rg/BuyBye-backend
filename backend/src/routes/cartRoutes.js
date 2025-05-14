@@ -1,4 +1,3 @@
-// routes/cartRoutes.js
 import express from "express";
 import {
   getCart,
@@ -20,6 +19,6 @@ router.post("/add", addToCart);
 router.put("/update/:productId", updateCartItem);
 router.delete("/remove/:productId", removeFromCart);
 router.put("/item/:productId/status", updateCartItemStatus);
-router.delete("/", clearCart); // <-- Clear entire cart
+router.delete("/", clearCart);
 
 export default router;
