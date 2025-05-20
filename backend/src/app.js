@@ -11,6 +11,7 @@ import reviewRoutes from './routes/reviewRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 
 const app = express();
 
@@ -76,7 +77,15 @@ app.get('/', (req, res) => {
         create: 'POST /api/categories',
         update: 'PUT /api/categories/:id',
         delete: 'DELETE /api/categories/:id'
-      }
+      },
+      users: {
+        all: 'GET /api/users',
+        byId: 'GET /api/users/:id',
+        create: 'POST /api/users',
+        update: 'PUT /api/users/:id',
+        delete: 'DELETE /api/users/:id',
+        changeRole: 'PUT /api/users/:id/role'
+      }  
     }
   });
 });
@@ -89,6 +98,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/users', userRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {

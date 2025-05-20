@@ -18,6 +18,10 @@ const UserSchema = new Schema({
     required: true,
     select: false
   },
+  image: {
+    type: String,
+    default: '/assets/images/account-profile.png'
+  },
   role: {
     type: String,
     enum: ['admin', 'user'],
