@@ -1,11 +1,10 @@
 import express from 'express';
-import { createOrder } from '../controllers/checkoutController.js';
-import { getBillingHistory } from '../controllers/checkoutController.js';
+import { createOrder, getBillingHistory } from '../controllers/checkoutController.js';
+import { protect } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-// Route to create an order
-router.post('/', createOrder);
-router.get('/billing-history', auth, getBillingHistory);
+router.post('/', protect, createOrder);
+router.get('/billing-history', protect, getBillingHistory);
 
 export default router;

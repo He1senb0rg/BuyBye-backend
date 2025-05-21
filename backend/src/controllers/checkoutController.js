@@ -5,76 +5,83 @@ import Order from '../models/Order.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const { userId, paymentMethod, shippingAddress } = req.body;
+    const { paymentMethod, shippingAddress } = req.body;
+    const userId = req.user.id;
 
-    // Validate request data
+    // Validate input
     if (!paymentMethod || !shippingAddress) {
       return res.status(400).json({ message: 'Payment method and shipping address are required.' });
     }
 
-    // Fetch user details
+    // Fetch user
     const user = await User.findById(userId);
     if (!user) {
       return res.status(400).json({ message: 'User not found' });
     }
 
-    // Fetch cart for the user
+    // Fetch cart
     const cart = await Cart.findOne({ user: userId });
     if (!cart || !cart.items.length) {
       return res.status(400).json({ message: 'Cart is empty' });
     }
 
-    // Fetch product details and check stock
-    const products = await Product.find({
-      _id: { $in: cart.items.map(item => item.product) },
-    });
+    // Get product details
+    const productIds = cart.items.map(item => item.product);
+    const products = await Product.find({ _id: { $in: productIds } });
 
     if (!products.length) {
       return res.status(400).json({ message: 'Products not found' });
     }
 
-    const items = cart.items.map(item => {
+    const items = [];
+
+    for (const item of cart.items) {
       const product = products.find(p => p._id.toString() === item.product.toString());
 
-      // Check if the product is in stock
+      if (!product) {
+        return res.status(400).json({ message: `Product not found: ${item.product}` });
+      }
+
       if (product.stock < item.quantity) {
         return res.status(400).json({ message: `Not enough stock for product: ${product.name}` });
       }
 
-      return {
+      items.push({
         product: product._id,
         quantity: item.quantity,
         selectedColor: item.selectedColor,
         selectedSize: item.selectedSize,
         price: product.price,
-      };
-    });
+      });
+    }
 
-    // Calculate the total amount
     const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    // Create an order
+    // Convert address object to JSON string
+    const shippingAddressString = JSON.stringify(shippingAddress);
+
+    // Create order
     const order = new Order({
       user: user._id,
       items,
       totalAmount,
-      shippingAddress,
+      shippingAddress: shippingAddressString,
       paymentMethod,
-      status: 'pending',  // Adding order status for tracking
+      orderStatus: 'pending',
     });
 
     await order.save();
 
-    // Optional: Update product stock after order is placed (if you're tracking stock)
+    // Update product stock
     await Promise.all(
-      items.map(async (item) => {
+      items.map(async item => {
         const product = await Product.findById(item.product);
-        product.stock -= item.quantity;  // Decrease stock
+        product.stock -= item.quantity;
         await product.save();
       })
     );
 
-    // Optional: Clear the cart after placing the order
+    // Clear the cart
     await Cart.deleteOne({ user: userId });
 
     res.status(201).json({
@@ -85,11 +92,14 @@ export const createOrder = async (req, res) => {
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: 'Error creating order' });
+    res.status(500).json({
+      message: 'Error creating order',
+      error: err.message,
+      stack: err.stack,
+    });
   }
 };
 
-// Fetch billing history for a logged-in user
 export const getBillingHistory = async (req, res) => {
   try {
     const userId = req.user.id;
