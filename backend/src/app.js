@@ -67,11 +67,12 @@ app.get('/', (req, res) => {
         removeItem: 'DELETE /api/cart/:productId',
         clearCart: 'DELETE /api/cart'
       },
-      wishlist:{
-        addToWishlist: 'POST /api/wishlist/add',
-        removeFromWishlist: 'DELETE /api/wishlist/remove',
+      wishlist: {
+        addToWishlist: 'POST /api/wishlist',
+        removeFromWishlist: 'DELETE /api/wishlist',
         getWishlist: 'GET /api/wishlist',
       },
+
       categories: {
         all: 'GET /api/categories',
         byId: 'GET /api/categories/:id',
