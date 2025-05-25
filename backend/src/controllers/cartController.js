@@ -53,21 +53,22 @@ export const addToCart = async (req, res) => {
 // Remove one unit or variation of an item
 export const removeFromCart = async (req, res) => {
   const { productId } = req.params;
-  const { selectedColor, selectedSize } = req.body;
+  const { selectedColor, selectedSize } = req.body; // May be undefined
 
   try {
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.status(404).json({ message: "Carrinho não encontrado." });
 
-    const itemIndex = cart.items.findIndex(
-      (item) =>
+    const itemIndex = cart.items.findIndex((item) => {
+      return (
         item.product.toString() === productId &&
-        item.selectedColor === selectedColor &&
-        item.selectedSize === selectedSize
-    );
+        (selectedColor === undefined || item.selectedColor === selectedColor) &&
+        (selectedSize === undefined || item.selectedSize === selectedSize)
+      );
+    });
 
     if (itemIndex === -1) {
-      return res.status(404).json({ message: "Item com essa variação não encontrado no carrinho." });
+      return res.status(404).json({ message: "Item não encontrado no carrinho." });
     }
 
     const item = cart.items[itemIndex];
@@ -89,7 +90,7 @@ export const removeFromCart = async (req, res) => {
 // Update item quantity
 export const updateCartItem = async (req, res) => {
   const { productId } = req.params;
-  const { quantity, selectedColor, selectedSize } = req.body;
+  const { quantity, selectedColor = null, selectedSize = null } = req.body;
 
   try {
     const product = await Product.findById(productId);
@@ -98,14 +99,17 @@ export const updateCartItem = async (req, res) => {
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.status(404).json({ message: "Carrinho não encontrado." });
 
-    const item = cart.items.find(
-      (i) =>
+    const item = cart.items.find((i) => {
+      return (
         i.product.toString() === productId &&
-        i.selectedColor === selectedColor &&
-        i.selectedSize === selectedSize
-    );
+        (i.selectedColor ?? null) === selectedColor &&
+        (i.selectedSize ?? null) === selectedSize
+      );
+    });
 
-    if (!item) return res.status(404).json({ message: "Item não encontrado no carrinho." });
+    if (!item) {
+      return res.status(404).json({ message: "Item não encontrado no carrinho com essa variação." });
+    }
 
     if (quantity > product.stock) {
       return res.status(400).json({ message: `Stock insuficiente. Máximo: ${product.stock}` });
