@@ -11,8 +11,9 @@ const router = express.Router();
 // Protect all routes
 router.use(protect);
 
-router.post('/add', addToWishlist);
-router.delete('/remove', removeFromWishlist);
-router.get('/:userId', getWishlist);
+router.post('/', addToWishlist);
+router.delete('/', removeFromWishlist);
+router.get('/', getWishlist);
+
 
 export default router;
