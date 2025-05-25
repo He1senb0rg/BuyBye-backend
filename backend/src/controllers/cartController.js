@@ -59,25 +59,15 @@ export const removeFromCart = async (req, res) => {
     const cart = await Cart.findOne({ user: req.user.id });
     if (!cart) return res.status(404).json({ message: "Carrinho não encontrado." });
 
-    const itemIndex = cart.items.findIndex((item) => {
-      return (
-        item.product.toString() === productId &&
-        (selectedColor === undefined || item.selectedColor === selectedColor) &&
-        (selectedSize === undefined || item.selectedSize === selectedSize)
-      );
+    // Filter out matching items (i.e., remove them)
+    cart.items = cart.items.filter((item) => {
+      const isSameProduct = item.product.toString() === productId;
+      const colorMatches = selectedColor === undefined || item.selectedColor === selectedColor;
+      const sizeMatches = selectedSize === undefined || item.selectedSize === selectedSize;
+
+      // Keep item if it DOESN'T match the criteria (i.e., exclude from deletion)
+      return !(isSameProduct && colorMatches && sizeMatches);
     });
-
-    if (itemIndex === -1) {
-      return res.status(404).json({ message: "Item não encontrado no carrinho." });
-    }
-
-    const item = cart.items[itemIndex];
-
-    if (item.quantity > 1) {
-      item.quantity -= 1;
-    } else {
-      cart.items.splice(itemIndex, 1);
-    }
 
     cart.updatedAt = Date.now();
     await cart.save();
