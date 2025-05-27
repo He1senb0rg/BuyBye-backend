@@ -12,6 +12,8 @@ import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import checkoutRoutes from './routes/checkoutRoutes.js';
+import { getBillingHistory } from './controllers/checkoutController.js';
 
 const app = express();
 
@@ -66,11 +68,12 @@ app.get('/', (req, res) => {
         removeItem: 'DELETE /api/cart/:productId',
         clearCart: 'DELETE /api/cart'
       },
-      wishlist:{
-        addToWishlist: 'POST /api/wishlist/add',
-        removeFromWishlist: 'DELETE /api/wishlist/remove',
+      wishlist: {
+        addToWishlist: 'POST /api/wishlist',
+        removeFromWishlist: 'DELETE /api/wishlist',
         getWishlist: 'GET /api/wishlist',
       },
+
       categories: {
         all: 'GET /api/categories',
         byId: 'GET /api/categories/:id',
@@ -84,8 +87,12 @@ app.get('/', (req, res) => {
         create: 'POST /api/users',
         update: 'PUT /api/users/:id',
         delete: 'DELETE /api/users/:id',
-        changeRole: 'PUT /api/users/:id/role'
-      }  
+        removeImage: 'PUT /api/users/:id/image'
+      },
+      checkout: {
+        createOrder: 'POST /api/checkout',
+        getBillingHistory: 'GET /api/checkout/billing-history'
+      }
     }
   });
 });
@@ -99,6 +106,7 @@ app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/checkout', checkoutRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
