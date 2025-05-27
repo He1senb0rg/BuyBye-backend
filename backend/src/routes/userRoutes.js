@@ -5,7 +5,7 @@ import {
     getUserById,
     updateUser,
     deleteUser,
-    changeUserRole,
+    removeImage
 } from "../controllers/userController.js";
 const router = Router();
 
@@ -13,6 +13,6 @@ router.get("/", protect, getAllUsers);
 router.get("/:id", protect, getUserById);
 router.put("/:id", protect, updateUser);
 router.delete("/:id", protect, deleteUser);
-router.put("/:id/role", protect, changeUserRole);
+router.put("/:id/image", protect, removeImage);
 
 export default router;

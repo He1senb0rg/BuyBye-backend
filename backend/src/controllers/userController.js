@@ -84,7 +84,7 @@ export async function updateUser(req, res) {
   }
 }
 
-// Deletar user
+// Apagar user
 export async function deleteUser(req, res) {
   try {
     const user = await User.findByIdAndDelete(req.params.id);
@@ -97,23 +97,17 @@ export async function deleteUser(req, res) {
   }
 }
 
-// Trocar role do user
-export async function changeUserRole(req, res) {
+// Remover imagem
+export async function removeImage(req, res) {
   try {
-    const { role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: "Utilizador não encontrado" });
     }
-    if (!["admin", "user"].includes(role)) {
-      return res.status(400).json({ error: "Role inválida" });
-    }
-    user.role = role;
+    user.image = "/assets/images/account-profile.png";
     await user.save();
-    res.json({ user });
-  }
-  catch (error) {
+    res.json({ message: "Imagem removida com sucesso" });
+  } catch (error) {
     res.status(500).json({ error: error.message });
   }
 }
-
