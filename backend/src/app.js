@@ -13,7 +13,6 @@ import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
-import { getBillingHistory } from './controllers/checkoutController.js';
 
 const app = express();
 
