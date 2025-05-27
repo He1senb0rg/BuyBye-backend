@@ -11,6 +11,7 @@ import reviewRoutes from './routes/reviewRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
 import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
+import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
 import { getBillingHistory } from './controllers/checkoutController.js';
 
@@ -80,6 +81,14 @@ app.get('/', (req, res) => {
         update: 'PUT /api/categories/:id',
         delete: 'DELETE /api/categories/:id'
       },
+      users: {
+        all: 'GET /api/users',
+        byId: 'GET /api/users/:id',
+        create: 'POST /api/users',
+        update: 'PUT /api/users/:id',
+        delete: 'DELETE /api/users/:id',
+        removeImage: 'PUT /api/users/:id/image'
+      },
       checkout: {
         createOrder: 'POST /api/checkout',
         getBillingHistory: 'GET /api/checkout/billing-history'
@@ -96,6 +105,7 @@ app.use('/api/reviews', reviewRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/checkout', checkoutRoutes);
 
 const PORT = process.env.PORT || 3000;
