@@ -61,22 +61,22 @@ export async function getUserById(req, res) {
 // Atualizar user
 export async function updateUser(req, res) {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, role } = req.body;
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: "Utilizador não encontrado" });
     }
+
     if (email) {
       const emailExists = await User.findOne({ email });
       if (emailExists && emailExists._id.toString() !== req.params.id) {
         return res.status(400).json({ error: "Email já está em uso" });
       }
     }
-    if (password) {
-      user.password = password;
-    }
+    
     user.name = name || user.name;
     user.email = email || user.email;
+    user.role = role || user.role;
     await user.save();
     res.json({ user });
   } catch (error) {
