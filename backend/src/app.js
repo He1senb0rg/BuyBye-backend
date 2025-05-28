@@ -90,7 +90,7 @@ app.get('/', (req, res) => {
       },
       checkout: {
         createOrder: 'POST /api/checkout',
-        getBillingHistory: 'GET /api/checkout/billing-history'
+        getBillingHistory: 'GET /api/checkout/history'
       }
     }
   });

@@ -94,7 +94,7 @@ const order = new Order({
     await Cart.deleteOne({ user: userId });
 
     res.status(201).json({
-      message: 'Order created successfully',
+      message: 'Pedido criado com sucesso.',
       orderId: order._id,
       totalAmount,
       items: order.items,
@@ -102,7 +102,7 @@ const order = new Order({
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: 'Error creating order',
+      message: 'Erro ao criar o pedido.',
       error: err.message,
       stack: err.stack,
     });
@@ -118,12 +118,12 @@ export const getBillingHistory = async (req, res) => {
       .populate('items.product', 'name image price');
 
     if (!orders.length) {
-      return res.status(404).json({ message: 'No orders found' });
+      return res.status(404).json({ message: 'Pedidos não encontrados' });
     }
 
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching billing history.' });
+    res.status(500).json({ message: 'Erro ao encontrar o histórico de faturamento.' });
   }
 };
