@@ -1,4 +1,3 @@
-// models/Order.js
 import { Schema, model } from 'mongoose';
 
 const OrderItemSchema = new Schema({
@@ -16,6 +15,13 @@ const OrderItemSchema = new Schema({
   price: Number,
 });
 
+const ShippingAddressSchema = new Schema({
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  state: { type: String, required: true },
+  zip: { type: String, required: true },
+}, { _id: false }); // Prevent Mongoose from creating a separate _id for the nested schema
+
 const OrderSchema = new Schema({
   user: {
     type: Schema.Types.ObjectId,
@@ -28,7 +34,7 @@ const OrderSchema = new Schema({
     required: true,
   },
   shippingAddress: {
-    type: String,
+    type: ShippingAddressSchema,
     required: true,
   },
   paymentMethod: {

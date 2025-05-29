@@ -57,18 +57,27 @@ export const createOrder = async (req, res) => {
 
     const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    // Convert address object to JSON string
-    const shippingAddressString = JSON.stringify(shippingAddress);
+   // Validate shippingAddress structure
+const { address, city, state, zip } = shippingAddress;
+if (!address || !city || !state || !zip) {
+  return res.status(400).json({ message: 'Morada incompleta.' });
+}
 
-    // Create order
-    const order = new Order({
-      user: user._id,
-      items,
-      totalAmount,
-      shippingAddress: shippingAddressString,
-      paymentMethod,
-      orderStatus: 'pending',
-    });
+// Create order
+const order = new Order({
+  user: user._id,
+  items,
+  totalAmount,
+  shippingAddress: {
+    address,
+    city,
+    state,
+    zip,
+  },
+  paymentMethod,
+  orderStatus: 'pending',
+});
+
 
     await order.save();
 
@@ -85,7 +94,7 @@ export const createOrder = async (req, res) => {
     await Cart.deleteOne({ user: userId });
 
     res.status(201).json({
-      message: 'Order created successfully',
+      message: 'Pedido criado com sucesso.',
       orderId: order._id,
       totalAmount,
       items: order.items,
@@ -93,7 +102,7 @@ export const createOrder = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({
-      message: 'Error creating order',
+      message: 'Erro ao criar o pedido.',
       error: err.message,
       stack: err.stack,
     });
@@ -109,12 +118,12 @@ export const getBillingHistory = async (req, res) => {
       .populate('items.product', 'name image price');
 
     if (!orders.length) {
-      return res.status(404).json({ message: 'No orders found' });
+      return res.status(404).json({ message: 'Pedidos não encontrados' });
     }
 
     res.json(orders);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching billing history.' });
+    res.status(500).json({ message: 'Erro ao encontrar o histórico de faturamento.' });
   }
 };
