@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs"
 
 // Obter todos os users
 export async function getAllUsers(req, res) {
@@ -107,6 +108,31 @@ export async function removeImage(req, res) {
     user.image = "/assets/images/account-profile.png";
     await user.save();
     res.json({ message: "Imagem removida com sucesso" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+//Mudar password
+
+export async function updatePassword(req, res) {
+  try {
+    const user = await User.findById(req.params.id).select("+password");
+    if (!user) {
+      return res.status(404).json({ error: "Utilizador não encontrado" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Palavra-passe atual incorreta" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Palavra-passe atualizada com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
