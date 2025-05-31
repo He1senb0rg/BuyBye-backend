@@ -62,7 +62,8 @@ export async function getUserById(req, res) {
 // Atualizar user
 export async function updateUser(req, res) {
   try {
-    const { name, email, role } = req.body;
+    const { name, email, role, phone } = req.body;
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: "Utilizador não encontrado" });
@@ -74,11 +75,14 @@ export async function updateUser(req, res) {
         return res.status(400).json({ error: "Email já está em uso" });
       }
     }
-    
+
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
+    user.phone = phone !== undefined ? phone : user.phone; // <-- Add this line
+
     await user.save();
+
     res.json({ user });
   } catch (error) {
     res.status(500).json({ error: error.message });
