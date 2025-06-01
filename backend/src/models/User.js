@@ -18,6 +18,10 @@ const UserSchema = new Schema({
     required: true,
     select: false
   },
+  phone: {
+    type: String,
+    default: null
+  },
   image: {
     type: String,
     default: '/assets/images/account-profile.png'

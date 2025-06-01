@@ -13,6 +13,7 @@ import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
+import { updatePassword } from './controllers/userController.js';
 
 const app = express();
 
@@ -86,7 +87,8 @@ app.get('/', (req, res) => {
         create: 'POST /api/users',
         update: 'PUT /api/users/:id',
         delete: 'DELETE /api/users/:id',
-        removeImage: 'PUT /api/users/:id/image'
+        removeImage: 'PUT /api/users/:id/image',
+        updatePassword: 'PUT /api/users/:id/password'
       },
       checkout: {
         createOrder: 'POST /api/checkout',

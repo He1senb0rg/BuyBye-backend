@@ -1,4 +1,5 @@
 import User from "../models/User.js";
+import bcrypt from "bcryptjs"
 
 // Obter todos os users
 export async function getAllUsers(req, res) {
@@ -61,7 +62,8 @@ export async function getUserById(req, res) {
 // Atualizar user
 export async function updateUser(req, res) {
   try {
-    const { name, email, role } = req.body;
+    const { name, email, role, phone } = req.body;
+
     const user = await User.findById(req.params.id);
     if (!user) {
       return res.status(404).json({ error: "Utilizador não encontrado" });
@@ -73,11 +75,14 @@ export async function updateUser(req, res) {
         return res.status(400).json({ error: "Email já está em uso" });
       }
     }
-    
+
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
+    user.phone = phone !== undefined ? phone : user.phone; // <-- Add this line
+
     await user.save();
+
     res.json({ user });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -107,6 +112,31 @@ export async function removeImage(req, res) {
     user.image = "/assets/images/account-profile.png";
     await user.save();
     res.json({ message: "Imagem removida com sucesso" });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+//Mudar password
+
+export async function updatePassword(req, res) {
+  try {
+    const user = await User.findById(req.params.id).select("+password");
+    if (!user) {
+      return res.status(404).json({ error: "Utilizador não encontrado" });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ error: "Palavra-passe atual incorreta" });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: "Palavra-passe atualizada com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
