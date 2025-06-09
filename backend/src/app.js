@@ -72,6 +72,7 @@ app.get('/', (req, res) => {
         addToWishlist: 'POST /api/wishlist',
         removeFromWishlist: 'DELETE /api/wishlist',
         getWishlist: 'GET /api/wishlist',
+        checkIfInWishlist: 'GET /api/wishlist/:productId'
       },
 
       categories: {
