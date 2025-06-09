@@ -13,6 +13,7 @@ import wishlistRoutes from './routes/wishlistRoutes.js'
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
+import shopRoutes from './routes/shopRoutes.js';
 import { updatePassword } from './controllers/userController.js';
 
 const app = express();
@@ -108,6 +109,7 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/checkout', checkoutRoutes);
+app.use('/api/shop', shopRoutes)
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
