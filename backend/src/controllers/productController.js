@@ -7,7 +7,7 @@ export async function createProduct(req, res) {
     console.log(req.body);
     const averageRating = 0;
 
-    const product = await Product.create({
+    const productData = {
       name,
       description,
       price,
@@ -15,13 +15,18 @@ export async function createProduct(req, res) {
       category,
       images,
       averageRating,
-      discount: {
-        type: discount_type || null,
-        value: discount_value || 0,
+    };
+
+    if (discount_type && discount_value !== "") {
+      productData.discount = {
+        type: discount_type,
+        value: discount_value,
         start_date: null,
         end_date: null,
-      },
-    });
+      };
+    }
+
+    const product = await Product.create(productData);
 
     res.status(201).json({ product });
   } catch (error) {
