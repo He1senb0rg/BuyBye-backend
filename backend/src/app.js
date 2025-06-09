@@ -1,46 +1,46 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import express, { json } from 'express';
-import { connect } from 'mongoose';
+import 'dotenv/config';
+import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import connectDB from '../src/config/db.js';
+import { connectGridFS } from '../src/config/gridfs.js';
 
+// Routes
 import authRoutes from './routes/authRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
-import wishlistRoutes from './routes/wishlistRoutes.js'
+import wishlistRoutes from './routes/wishlistRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
-import { updatePassword } from './controllers/userController.js';
+// import fileRoutes from './routes/fileRoutes.js';
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(json());
+app.use(express.json());
 app.use(morgan('dev'));
 
+// MongoDB connection
+const startServer = async () => {
+  try {
+    const conn = await connectDB();
+    connectGridFS(conn);
 
-// Conexão com o MongoDB
-connect(process.env.MONGO_URI, {
-  auth: {
-    username: process.env.MONGO_USER,
-    password: process.env.MONGO_PASSWORD
-  },
-  authSource: "auth_db",
-  retryWrites: true,
-  w: "majority"
-})
-.then(() => console.log('Conectado ao MongoDB com sucesso!'))
-.catch(err => {
-  console.error('Erro na conexão com MongoDB:', err.message);
-  console.error('Stack trace:', err.stack);
-});
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+    });
+  } catch (err) {
+    console.error('🔴 Falha ao iniciar o servidor:', err.message);
+  }
+};
 
-  
-// Rota raiz
+startServer();
+
+// Rota Raiz
 app.get('/', (req, res) => {
   res.json({
     message: 'Bem-vindo à API da BuyBye!',
@@ -74,7 +74,6 @@ app.get('/', (req, res) => {
         getWishlist: 'GET /api/wishlist',
         checkIfInWishlist: 'GET /api/wishlist/:productId'
       },
-
       categories: {
         all: 'GET /api/categories',
         byId: 'GET /api/categories/:id',
@@ -94,13 +93,16 @@ app.get('/', (req, res) => {
       checkout: {
         createOrder: 'POST /api/checkout',
         getBillingHistory: 'GET /api/checkout/history'
+      },
+      files: {
+        upload: 'POST /api/files/upload',
+        getFile: 'GET /api/files/:filename'
       }
     }
   });
 });
 
-
-// Rotas da API
+// API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
@@ -109,8 +111,4 @@ app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/checkout', checkoutRoutes);
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+// app.use('/api/files', fileRoutes);
