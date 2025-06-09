@@ -5,12 +5,17 @@ import Order from '../models/Order.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const { paymentMethod, shippingAddress } = req.body;
+    const { paymentMethod, shippingAddress, phoneNumber } = req.body;
     const userId = req.user.id;
 
     // Validate input
-    if (!paymentMethod || !shippingAddress) {
-      return res.status(400).json({ message: 'Payment method and shipping address are required.' });
+    if (!paymentMethod || !shippingAddress || !phoneNumber) {
+      return res.status(400).json({ message: 'Payment method, shipping address, and phone number are required.' });
+    }
+
+    // Validate phone number (basic check)
+    if (typeof phoneNumber !== 'string' || phoneNumber.trim().length < 6) {
+      return res.status(400).json({ message: 'Invalid phone number.' });
     }
 
     // Fetch user
@@ -57,27 +62,27 @@ export const createOrder = async (req, res) => {
 
     const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-   // Validate shippingAddress structure
-const { address, city, state, zip } = shippingAddress;
-if (!address || !city || !state || !zip) {
-  return res.status(400).json({ message: 'Morada incompleta.' });
-}
+    // Validate shippingAddress structure
+    const { address, city, state, zip } = shippingAddress;
+    if (!address || !city || !state || !zip) {
+      return res.status(400).json({ message: 'Morada incompleta.' });
+    }
 
-// Create order
-const order = new Order({
-  user: user._id,
-  items,
-  totalAmount,
-  shippingAddress: {
-    address,
-    city,
-    state,
-    zip,
-  },
-  paymentMethod,
-  orderStatus: 'pending',
-});
-
+    // Create order
+    const order = new Order({
+      user: user._id,
+      items,
+      totalAmount,
+      shippingAddress: {
+        address,
+        city,
+        state,
+        zip,
+      },
+      phoneNumber,
+      paymentMethod,
+      orderStatus: 'pending',
+    });
 
     await order.save();
 
