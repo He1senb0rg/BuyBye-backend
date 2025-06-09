@@ -78,6 +78,8 @@ export const getWishlist = async (req, res) => {
   }
 };
 
+// Check if a product is in the user's wishlist
+
 export const checkIfInWishlist = async (req, res) => {
   try {
     const userId = req.user.id;

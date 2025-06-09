@@ -2,7 +2,8 @@ import express from 'express';
 import {
     addToWishlist,
     removeFromWishlist,
-    getWishlist
+    getWishlist,
+    checkIfInWishlist
 } from '../controllers/wishlistController.js';
 import { protect } from '../middlewares/authMiddleware.js';
 
