@@ -1,4 +1,8 @@
 import Product from "../models/Product.js";
+import Cart from "../models/Cart.js";
+import Wishlist from "../models/Wishlist.js";
+import Review from "../models/Review.js";
+import Order from "../models/Order.js";
 
 // Criar um novo produto
 export async function createProduct(req, res) {
@@ -123,8 +127,16 @@ export const updateProduct = async (req, res) => {
 export const deleteProduct = async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
+
+    // Remover o produto de todos os carrinhos, listas de desejos, avaliações e compras
+    await Cart.deleteMany({ "items.product": req.params.id });
+    await Wishlist.deleteMany({ product: req.params.id });
+    await Review.deleteMany({ product: req.params.id });
+    await Order.deleteMany({ "items.product": req.params.id });
+
     res.json({ message: "Produto apagado com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
+    console.error(error);
   }
 };
