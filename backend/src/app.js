@@ -6,6 +6,7 @@ import morgan from 'morgan';
 import cors from 'cors';
 
 import authRoutes from './routes/authRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
 import productRoutes from './routes/productRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import cartRoutes from './routes/cartRoutes.js';
@@ -14,6 +15,7 @@ import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
 import { updatePassword } from './controllers/userController.js';
+
 
 const app = express();
 
@@ -45,6 +47,7 @@ app.get('/', (req, res) => {
   res.json({
     message: 'Bem-vindo à API da BuyBye!',
     endpoints: {
+      dashBoard: 'GET /api/dashboard/summary',
       register: 'POST /api/auth/register',
       login: 'POST /api/auth/login',
       products: {
@@ -101,13 +104,14 @@ app.get('/', (req, res) => {
 
 // Rotas da API
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/checkout', checkoutRoutes);
+app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/cart', cartRoutes);
-app.use('/api/wishlist', wishlistRoutes);
-app.use('/api/categories', categoryRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/checkout', checkoutRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
