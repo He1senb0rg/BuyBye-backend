@@ -37,6 +37,10 @@ const OrderSchema = new Schema({
     type: ShippingAddressSchema,
     required: true,
   },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
   paymentMethod: {
     type: String,
     enum: ['ccdb', 'paypal', 'multibanco', 'mbway'],
