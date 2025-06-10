@@ -19,7 +19,6 @@ import checkoutRoutes from './routes/checkoutRoutes.js';
 import shopRoutes from './routes/shopRoutes.js';
 import { updatePassword } from './controllers/userController.js';
 
-
 const app = express();
 
 // Middleware
@@ -38,7 +37,7 @@ const startServer = async () => {
       console.log(`Servidor rodando na porta ${PORT}`);
     });
   } catch (err) {
-    console.error('🔴 Falha ao iniciar o servidor:', err.message);
+    console.error('Falha ao iniciar o servidor:', err.message);
   }
 };
 
@@ -119,8 +118,3 @@ app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 // app.use('/api/files', fileRoutes);
 app.use('/api/shop', shopRoutes)
-
-//const PORT = process.env.PORT || 3000;
-//app.listen(PORT, () => {
-//  console.log(`Servidor rodando na porta ${PORT}`);
-//});
