@@ -1,33 +1,37 @@
-// const express = require('express');
-// const { getGFS } = require('../config/gridfs');
-// const upload = require('../config/gridfsStorage');
-// const router = express.Router();
+// src/routes/fileRoutes.js
+import express from 'express';
+import upload from '../config/gridfsStorage.js';
+import { getGFSBucket } from '../config/gridfs.js';
+import mongoose from 'mongoose';
 
-// // Upload file
-// router.post('/upload', upload.single('file'), (req, res) => {
-//   res.json({ file: req.file });
-// });
+const router = express.Router();
 
-// // Get file by filename
-// router.get('/:filename', async (req, res) => {
-//   try {
-//     const gfs = getGFS();
-//     if (!gfs) {
-//       return res.status(500).json({ message: 'GridFS not initialized' });
-//     }
+// Upload endpoint
+router.post('/upload', upload.single('file'), (req, res) => {
+  res.json({ file: req.file });
+});
 
-//     const file = await gfs.files.findOne({ filename: req.params.filename });
+// Get file by filename
+router.get('/:filename', async (req, res) => {
+  try {
+    const gfsBucket = getGFSBucket();
 
-//     if (!file || file.length === 0) {
-//       return res.status(404).json({ message: 'No file exists' });
-//     }
+    // Find the file first
+    const files = await gfsBucket.find({ filename: req.params.filename }).toArray();
 
-//     const readstream = gfs.createReadStream(file.filename);
-//     res.set('Content-Type', file.contentType);
-//     readstream.pipe(res);
-//   } catch (err) {
-//     res.status(500).json({ message: 'Error retrieving file', error: err.message });
-//   }
-// });
+    if (!files || files.length === 0) {
+      return res.status(404).json({ error: 'File not found' });
+    }
 
-// module.exports = router;
+    // Set correct content type
+    res.set('Content-Type', files[0].contentType);
+
+    // Stream the file
+    const downloadStream = gfsBucket.openDownloadStreamByName(req.params.filename);
+    downloadStream.pipe(res);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+export default router;

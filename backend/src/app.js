@@ -3,7 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import connectDB from '../src/config/db.js';
-//import { connectGridFS } from '../src/config/gridfs.js';
+import { connectGridFS } from '../src/config/gridfs.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -15,9 +15,8 @@ import wishlistRoutes from './routes/wishlistRoutes.js';
 import categoryRoutes from './routes/categoryRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import checkoutRoutes from './routes/checkoutRoutes.js';
-// import fileRoutes from './routes/fileRoutes.js';
+import fileRoutes from './routes/fileRoutes.js';
 import shopRoutes from './routes/shopRoutes.js';
-import { updatePassword } from './controllers/userController.js';
 
 const app = express();
 
@@ -30,7 +29,9 @@ app.use(morgan('dev'));
 const startServer = async () => {
   try {
     const conn = await connectDB();
-    //connectGridFS(conn);
+
+    // Connect GridFS after DB is connected
+    connectGridFS(conn);
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
@@ -116,5 +117,5 @@ app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
-// app.use('/api/files', fileRoutes);
-app.use('/api/shop', shopRoutes)
+app.use('/api/files', fileRoutes);
+app.use('/api/shop', shopRoutes);
