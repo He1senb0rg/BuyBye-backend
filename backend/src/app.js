@@ -3,7 +3,7 @@ import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
 import connectDB from '../src/config/db.js';
-import { connectGridFS } from '../src/config/gridfs.js';
+//import { connectGridFS } from '../src/config/gridfs.js';
 
 // Routes
 import authRoutes from './routes/authRoutes.js';
@@ -29,7 +29,7 @@ app.use(morgan('dev'));
 const startServer = async () => {
   try {
     const conn = await connectDB();
-    connectGridFS(conn);
+    //connectGridFS(conn);
 
     const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
