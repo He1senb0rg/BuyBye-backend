@@ -3,11 +3,11 @@ import Product from "../models/Product.js";
 // Criar um novo produto
 export async function createProduct(req, res) {
   try {
-    const { name, description, price, stock, category, images } = req.body;
+    const { name, description, price, stock, category, images, discount_type, discount_value } = req.body;
     console.log(req.body);
     const averageRating = 0;
 
-    const product = await Product.create({
+    const productData = {
       name,
       description,
       price,
@@ -15,7 +15,18 @@ export async function createProduct(req, res) {
       category,
       images,
       averageRating,
-    });
+    };
+
+    if (discount_type && discount_value !== "") {
+      productData.discount = {
+        type: discount_type,
+        value: discount_value,
+        start_date: null,
+        end_date: null,
+      };
+    }
+
+    const product = await Product.create(productData);
 
     res.status(201).json({ product });
   } catch (error) {
@@ -98,6 +109,7 @@ export const updateProduct = async (req, res) => {
     const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
+    
     if (!updated) {
       return res.status(404).json({ message: "Produto não encontrado" });
     }
@@ -112,26 +124,6 @@ export const deleteProduct = async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
     res.json({ message: "Produto apagado com sucesso" });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-};
-
-// Adicionar desconto a um produto
-export const updateProductDiscount = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { type, value, start_date, end_date } = req.body;
-
-    const updated = await Product.findByIdAndUpdate(
-      id,
-      {
-        discount: { type, value, start_date, end_date },
-      },
-      { new: true }
-    );
-
-    res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

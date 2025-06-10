@@ -77,3 +77,25 @@ export const getWishlist = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Check if a product is in the user's wishlist
+
+export const checkIfInWishlist = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { productId } = req.params;
+
+    const wishlist = await Wishlist.findOne({ user: userId });
+
+    if (!wishlist) {
+      return res.status(200).json({ isWishlisted: false });
+    }
+
+    const isWishlisted = wishlist.items.some(item => item.product.toString() === productId);
+
+    return res.status(200).json({ isWishlisted });
+  } catch (error) {
+    console.error('Error checking wishlist:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
