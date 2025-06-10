@@ -6,7 +6,8 @@ import {
     getAllShops,
     getShopById, 
     updateShop,
-    deleteShop
+    deleteShop,
+    updateShopBanner
 } from '../controllers/shopController.js';
 
 
@@ -15,5 +16,6 @@ router.get('/', getAllShops);
 router.get('/:id', getShopById);
 router.put('/:id',protect, updateShop);
 router.delete('/:id',protect, deleteShop);
+router.put('/:id/banner', protect, updateShopBanner);
 
 export default router;

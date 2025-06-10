@@ -32,8 +32,43 @@ export const createShop = async (req, res) => {
 // Listar todas as lojas
 export const getAllShops = async (req, res) => {
     try {
-        const shop = await Shop.find().populate('user');
-        res.json(shop);
+        const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const sortOption = req.query.sort;
+    const search = req.query.search || "";
+
+    let sortBy = {};
+    switch (sortOption) {
+      case "nome_az":
+        sortBy = { name: 1 };
+        break;
+      case "nome_za":
+        sortBy = { name: -1 };
+        break;
+      case "mais_recente":
+        sortBy = { createdAt: -1 };
+        break;
+      case "mais_antigo":
+        sortBy = { createdAt: 1 };
+        break;
+      default:
+        sortBy = { createdAt: -1 };
+    }
+
+        const shops = await Shop.find({
+      name: { $regex: search, $options: "i" },
+    })
+      .sort(sortBy)
+      .skip(skip)
+      .limit(limit)
+      .populate('user');
+
+          const totalShops = await Shop.countDocuments({
+            name: { $regex: search, $options: "i" },
+          });
+
+        res.json({shops, totalShops });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -84,3 +119,32 @@ export const deleteShop = async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 }
+
+// editar banner da loja
+export const updateShopBanner = async (req, res) => {
+    try {
+        const { title, description, link, buttonText, image } = req.body;
+
+        const updatedShop = await Shop.findByIdAndUpdate(
+            req.params.id,
+            {
+                banner: {
+                    title,
+                    description,
+                    link,
+                    buttonText,
+                    image
+                }
+            },
+            { new: true }
+        );
+
+        if (!updatedShop) {
+            return res.status(404).json({ message: 'Loja não encontrada' });
+        }
+
+        res.json(updatedShop);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
