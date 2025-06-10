@@ -1,5 +1,27 @@
 import { Schema, model } from 'mongoose';
 
+const BannerSchema = new Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+    },
+    link: {
+      type: String,
+    },
+    buttonText: {
+      type: String,
+    },
+    image: {
+      type: String
+    }
+  },
+  { _id: false }
+);
+
 const ShopSchema = new Schema({
     name: {
         type: String,
@@ -12,7 +34,6 @@ const ShopSchema = new Schema({
     phone: {
         type: Number,
         required: true,
-        min: 9
     },
     description: {
         type: String,
@@ -22,6 +43,9 @@ const ShopSchema = new Schema({
         type: Schema.Types.ObjectId,
         ref: 'User',
         required: true
+    },
+    banner: {
+        type: BannerSchema
     },
     logo: {
         type:String,
