@@ -1,4 +1,5 @@
 import Category from "../models/Category.js";
+import Product from "../models/Product.js";
 
 // Criar uma nova categoria
 export const createCategory = async (req, res) => {
@@ -91,9 +92,10 @@ export const updateCategory = async (req, res) => {
 
     const updatedCategory = await Category.findByIdAndUpdate(
       req.params.id,
-      { name },
+      req.body,
       { new: true }
     );
+    
     if (!updatedCategory) {
       return res.status(404).json({ message: "Categoria não encontrada" });
     }
@@ -110,6 +112,10 @@ export const deleteCategory = async (req, res) => {
     if (!deletedCategory) {
       return res.status(404).json({ message: "Categoria não encontrada" });
     }
+
+    // apagar todos os produtos associados a esta categoria
+    await Product.deleteMany({ category: req.params.id });
+
     res.json({ message: "Categoria apagada com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });

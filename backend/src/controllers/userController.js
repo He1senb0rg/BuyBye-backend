@@ -1,5 +1,9 @@
 import User from "../models/User.js";
 import bcrypt from "bcryptjs"
+import Cart from "../models/Cart.js";
+import Wishlist from "../models/Wishlist.js";
+import Review from "../models/Review.js";
+import Order from "../models/Order.js";
 
 // Obter todos os users
 export async function getAllUsers(req, res) {
@@ -79,7 +83,7 @@ export async function updateUser(req, res) {
     user.name = name || user.name;
     user.email = email || user.email;
     user.role = role || user.role;
-    user.phone = phone !== undefined ? phone : user.phone; // <-- Add this line
+    user.phone = phone !== undefined ? phone : user.phone;
 
     await user.save();
 
@@ -96,6 +100,14 @@ export async function deleteUser(req, res) {
     if (!user) {
       return res.status(404).json({ error: "Utilizador não encontrado" });
     }
+
+    // apagar dados relacionados
+    await User.deleteMany({ user: req.params.id });
+    await Cart.deleteMany({ user: req.params.id });
+    await Wishlist.deleteMany({ user: req.params.id });
+    await Review.deleteMany({ user: req.params.id });
+    await Order.deleteMany({ user: req.params.id });
+    
     res.json({ message: "Utilizador deletado com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
