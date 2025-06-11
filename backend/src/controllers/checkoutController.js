@@ -120,7 +120,7 @@ export const getBillingHistory = async (req, res) => {
 
     const orders = await Order.find({ user: userId })
       .sort({ createdAt: -1 })
-      .populate('items.product', 'name image price')
+      .populate('items.product', 'name images price')
       .populate('user', 'name');
 
     if (!orders.length) {
@@ -138,7 +138,7 @@ export const getOrders = async (req, res) => {
   try {
       const orders = await Order.find({})
       .sort({ createdAt: -1 })
-      .populate('items.product', 'name image price')
+      .populate('items.product', 'name images price discount')
       .populate('user', 'name');
 
     if (!orders.length) {
