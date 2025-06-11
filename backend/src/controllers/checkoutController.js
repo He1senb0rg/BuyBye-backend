@@ -120,7 +120,26 @@ export const getBillingHistory = async (req, res) => {
 
     const orders = await Order.find({ user: userId })
       .sort({ createdAt: -1 })
-      .populate('items.product', 'name image price');
+      .populate('items.product', 'name image price')
+      .populate('user', 'name');
+
+    if (!orders.length) {
+      return res.status(404).json({ message: 'Pedidos não encontrados' });
+    }
+
+    res.json(orders);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Erro ao encontrar o histórico de faturamento.' });
+  }
+};
+
+export const getOrders = async (req, res) => {
+  try {
+      const orders = await Order.find({})
+      .sort({ createdAt: -1 })
+      .populate('items.product', 'name image price')
+      .populate('user', 'name');
 
     if (!orders.length) {
       return res.status(404).json({ message: 'Pedidos não encontrados' });
