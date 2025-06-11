@@ -7,6 +7,7 @@ import {
   getProductById,
   updateProduct,
   deleteProduct,
+  getAllProductsWithDiscount
 } from '../controllers/productController.js';
 
 
@@ -15,5 +16,6 @@ router.get('/', getAllProducts);
 router.get('/:id', getProductById);
 router.put('/:id', protect, updateProduct);
 router.delete('/:id', protect, deleteProduct);
+router.get('/sales', getAllProductsWithDiscount)
 
 export default router;
