@@ -13,9 +13,9 @@ import {
 
 router.post('/', protect, createProduct);
 router.get('/', getAllProducts);
+router.get('/sales', getAllProductsWithDiscount)
 router.get('/:id', getProductById);
 router.put('/:id', protect, updateProduct);
 router.delete('/:id', protect, deleteProduct);
-router.get('/sales', getAllProductsWithDiscount)
 
 export default router;

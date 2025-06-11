@@ -143,8 +143,6 @@ export const deleteProduct = async (req, res) => {
 
 // Obter todos os produtos que têm desconto
 export const getAllProductsWithDiscount = async (req, res) => {
-    console.log("ola")
-
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -170,7 +168,7 @@ export const getAllProductsWithDiscount = async (req, res) => {
     }
 
     const products = await Product.find({
-      discount: {$exists: true},
+      discount: { $exists: true, $ne: null },
     })
       .sort(sortBy)
       .skip(skip)
@@ -179,7 +177,7 @@ export const getAllProductsWithDiscount = async (req, res) => {
       .populate("category");
 
     const totalProducts = await Product.countDocuments({
-      discount: {$exists: true},
+      discount: { $exists: true, $ne: null },
     });
 
     res.json({ products, totalProducts });
