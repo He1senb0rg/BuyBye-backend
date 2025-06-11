@@ -1,4 +1,4 @@
-import { Schema, model } from "mongoose";
+import { Schema, model, Types } from "mongoose";
 
 const DiscountSchema = new Schema(
   {
@@ -19,7 +19,7 @@ const DiscountSchema = new Schema(
   { _id: false }
 );
 
-const colorSchema = Schema(
+const colorSchema = new Schema(
   {
     name: String,
     hex: String,
@@ -27,7 +27,7 @@ const colorSchema = Schema(
   { _id: false }
 );
 
-const sizeSchema = Schema(
+const sizeSchema = new Schema(
   {
     name: String,
     size: String,
@@ -67,17 +67,15 @@ const ProductSchema = new Schema({
     type: Number,
     default: 0,
   },
-  category: 
-    {
-      type: Schema.Types.ObjectId,
-      ref: "Category",
-      required: false,
-    },
-  
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: "Category",
+    required: false,
+  },
   images: [
     {
-      type: String,
-      // required: true,
+      type: Types.ObjectId,
+      ref: "uploads.files",
     },
   ],
   createdAt: {

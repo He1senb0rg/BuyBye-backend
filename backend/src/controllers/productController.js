@@ -7,8 +7,12 @@ import Order from "../models/Order.js";
 // Criar um novo produto
 export async function createProduct(req, res) {
   try {
-    const { name, description, price, stock, category, images, discount_type, discount_value } = req.body;
-    console.log(req.body);
+    const { name, description, price, stock, category, discount_type, discount_value } = req.body;
+
+    const images = req.files && req.files.length > 0
+      ? req.files.map(file => `/api/files/${file.filename}`)
+      : [];
+
     const averageRating = 0;
 
     const productData = {
@@ -110,13 +114,20 @@ export const getProductById = async (req, res) => {
 // Atualizar produto
 export const updateProduct = async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
+    const updateData = { ...req.body };
+
+    if (req.files && req.files.length > 0) {
+      updateData.images = req.files.map(file => `/api/files/${file.filename}`);
+    }
+
+    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, {
       new: true,
     });
-    
+
     if (!updated) {
       return res.status(404).json({ message: "Produto não encontrado" });
     }
+
     res.json(updated);
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -128,7 +139,6 @@ export const deleteProduct = async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
 
-    // Remover o produto de todos os carrinhos, listas de desejos, avaliações e compras
     await Cart.deleteMany({ "items.product": req.params.id });
     await Wishlist.deleteMany({ product: req.params.id });
     await Review.deleteMany({ product: req.params.id });
