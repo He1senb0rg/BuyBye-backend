@@ -5,12 +5,17 @@ import Order from '../models/Order.js';
 
 export const createOrder = async (req, res) => {
   try {
-    const { paymentMethod, shippingAddress, phoneNumber } = req.body;
+    const { paymentMethod, shippingAddress, phoneNumber, totalAmount } = req.body; // <-- Accept totalAmount from frontend
     const userId = req.user.id;
 
     // Validate input
     if (!paymentMethod || !shippingAddress || !phoneNumber) {
       return res.status(400).json({ message: 'Payment method, shipping address, and phone number are required.' });
+    }
+
+    // Validate totalAmount (basic check)
+    if (typeof totalAmount !== 'number' || totalAmount <= 0) {
+      return res.status(400).json({ message: 'Invalid total amount.' });
     }
 
     // Validate phone number (basic check)
@@ -60,19 +65,17 @@ export const createOrder = async (req, res) => {
       });
     }
 
-    const totalAmount = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
     // Validate shippingAddress structure
     const { address, city, state, zip } = shippingAddress;
     if (!address || !city || !state || !zip) {
       return res.status(400).json({ message: 'Morada incompleta.' });
     }
 
-    // Create order
+    // Create order using totalAmount from frontend
     const order = new Order({
       user: user._id,
       items,
-      totalAmount,
+      totalAmount,  // use frontend calculated amount
       shippingAddress: {
         address,
         city,
