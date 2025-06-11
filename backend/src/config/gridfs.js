@@ -1,15 +1,13 @@
 import mongoose from 'mongoose';
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
-const Grid = require('gridfs-stream');
 
-let gfs;
+let gfsBucket;
 
 const connectGridFS = (conn) => {
-  gfs = Grid(conn.connection.db, mongoose.mongo);
-  gfs.collection('uploads');
+  gfsBucket = new mongoose.mongo.GridFSBucket(conn.connection.db, {
+    bucketName: 'uploads',
+  });
 };
 
-const getGFS = () => gfs;
+const getGFSBucket = () => gfsBucket;
 
-export { connectGridFS, getGFS };
+export { connectGridFS, getGFSBucket };

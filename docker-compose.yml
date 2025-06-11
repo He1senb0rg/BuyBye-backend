@@ -6,7 +6,7 @@ services:
     ports:
       - "3000:3000"
     networks:
-      - dsa-network      
+      - dsa-network
     volumes:
       - ./backend:/app
       - /app/node_modules
@@ -14,6 +14,3 @@ services:
 networks:
   dsa-network:
     driver: bridge
-
-volumes:
-  mongodb_data:
