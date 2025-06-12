@@ -4,21 +4,16 @@ import Wishlist from "../models/Wishlist.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 
-import fs from 'fs';
-
 export async function createProduct(req, res) {
   try {
     process.stdout.write('==== New Create Product Request ====\n');
     process.stdout.write(`Request body: ${JSON.stringify(req.body)}\n`);
     process.stdout.write(`Request files: ${JSON.stringify(req.files)}\n`);
 
-
     let { name, description, price, stock, category, discount_type, discount_value } = req.body;
 
-    price = parseFloat(price);
-    stock = parseInt(stock);
-
     if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
+      process.stdout.write(res.status(400).json({ error: "Missing or invalid required fields" }));
       return res.status(400).json({ error: "Missing or invalid required fields" });
     }
 
