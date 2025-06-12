@@ -4,16 +4,27 @@ import Wishlist from "../models/Wishlist.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
 
-// Criar um novo produto
+import fs from 'fs';
+
 export async function createProduct(req, res) {
   try {
-    const { name, description, price, stock, category, discount_type, discount_value } = req.body;
+    process.stdout.write('==== New Create Product Request ====\n');
+    process.stdout.write(`Request body: ${JSON.stringify(req.body)}\n`);
+    process.stdout.write(`Request files: ${JSON.stringify(req.files)}\n`);
+
+
+    let { name, description, price, stock, category, discount_type, discount_value } = req.body;
+
+    price = parseFloat(price);
+    stock = parseInt(stock);
+
+    if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
+      return res.status(400).json({ error: "Missing or invalid required fields" });
+    }
 
     const images = req.files && req.files.length > 0
-      ? req.files.map(file => `/api/files/${file.filename}`)
+      ? req.files.map(file => file.id)
       : [];
-
-    const averageRating = 0;
 
     const productData = {
       name,
@@ -22,7 +33,7 @@ export async function createProduct(req, res) {
       stock,
       category,
       images,
-      averageRating,
+      averageRating: 0,
     };
 
     if (discount_type && discount_value !== "") {
@@ -38,8 +49,8 @@ export async function createProduct(req, res) {
 
     res.status(201).json({ product });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
-    console.error(error.message);
   }
 }
 
