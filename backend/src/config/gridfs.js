@@ -10,4 +10,9 @@ const connectGridFS = (conn) => {
 
 const getGFSBucket = () => gfsBucket;
 
-export { connectGridFS, getGFSBucket };
+const getGFSFilesCollection = () => {
+  if (!gfsBucket) throw new Error("GridFSBucket not initialized");
+  return gfsBucket.s.db.collection("uploads.files");  // Access the files collection
+};
+
+export { connectGridFS, getGFSBucket, getGFSFilesCollection };

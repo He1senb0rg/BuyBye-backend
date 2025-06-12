@@ -3,6 +3,7 @@ import Cart from "../models/Cart.js";
 import Wishlist from "../models/Wishlist.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
+import { mapImageIdsToUrls } from "../utils/fileHelpers.js";
 
 export async function createProduct(req, res) {
   try {
@@ -89,7 +90,15 @@ export const getAllProducts = async (req, res) => {
       name: { $regex: search, $options: "i" },
     });
 
-    res.json({ products, totalProducts });
+    // Map image IDs to URLs for each product
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        const imagesWithUrls = await mapImageIdsToUrls(product.images);
+        return { ...product.toObject(), images: imagesWithUrls };
+      })
+    );
+
+    res.json({ products: productsWithImages, totalProducts });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -100,10 +109,7 @@ export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate({
       path: "reviews",
-      populate: {
-        path: "user",
-        select: "name",
-      },
+      populate: { path: "user", select: "name" },
     });
     if (!product) {
       return res.status(404).json({ message: "Produto não encontrado" });
@@ -111,7 +117,9 @@ export const getProductById = async (req, res) => {
 
     product.reviews.sort((a, b) => b.createdAt - a.createdAt);
 
-    res.json(product);
+    const imagesWithUrls = await mapImageIdsToUrls(product.images);
+
+    res.json({ ...product.toObject(), images: imagesWithUrls });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

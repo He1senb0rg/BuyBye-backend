@@ -25,12 +25,13 @@ app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 
-// MongoDB connection
+// MongoDB connection and GridFS initialization
 const startServer = async () => {
   try {
+    // Connect to MongoDB
     const conn = await connectDB();
 
-    // Connect GridFS after DB is connected
+    // Initialize GridFSBucket with the mongoose connection
     connectGridFS(conn);
 
     const PORT = process.env.PORT || 3000;
@@ -39,6 +40,7 @@ const startServer = async () => {
     });
   } catch (err) {
     console.error('Falha ao iniciar o servidor:', err.message);
+    process.exit(1); // Exit with failure
   }
 };
 
@@ -119,3 +121,5 @@ app.use('/api/users', userRoutes);
 app.use('/api/wishlist', wishlistRoutes);
 app.use('/api/files', fileRoutes);
 app.use('/api/shop', shopRoutes);
+
+export default app;
