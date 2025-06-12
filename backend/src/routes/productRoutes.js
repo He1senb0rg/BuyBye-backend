@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../middlewares/authMiddleware.js';
-import upload from '../config/gridfsStorage.js'; // GridFS multer storage
-
+import upload from '../config/gridfsStorage.js';
 import {
   createProduct,
   getAllProducts,

@@ -7,9 +7,6 @@ import { mapImageIdsToUrls } from "../utils/fileHelpers.js";
 
 export async function createProduct(req, res) {
   try {
-    process.stdout.write('==== New Create Product Request ====\n');
-    process.stdout.write(`Request body: ${JSON.stringify(req.body)}\n`);
-    process.stdout.write(`Request files: ${JSON.stringify(req.files)}\n`);
 
     let { name, description, price, stock, category, discount_type, discount_value } = req.body;
 
@@ -125,26 +122,74 @@ export const getProductById = async (req, res) => {
   }
 };
 
-// Atualizar produto
+//Atualizar produto
 export const updateProduct = async (req, res) => {
   try {
-    const updateData = { ...req.body };
-
-    if (req.files && req.files.length > 0) {
-      updateData.images = req.files.map(file => `/api/files/${file.filename}`);
+    // Validate form data
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: "No form data received" });
     }
 
-    const updated = await Product.findByIdAndUpdate(req.params.id, updateData, {
-      new: true,
+    const { id } = req.params;
+    const { name, description, price, stock, category, discount } = req.body;
+    const files = req.files || [];
+
+    // Ensure existingImages is always an array
+    const existingImages = req.body.existingImages
+      ? Array.isArray(req.body.existingImages)
+        ? req.body.existingImages
+        : [req.body.existingImages]
+      : [];
+
+    // Parse discount if provided
+    let discountObj = null;
+    if (discount && typeof discount === 'string') {
+      try {
+        discountObj = JSON.parse(discount);
+      } catch (e) {
+        console.error('Error parsing discount:', e);
+      }
+    }
+
+    // Prepare update data
+    const updateData = {
+      name,
+      description,
+      price: parseFloat(price),
+      stock: parseInt(stock),
+      category,
+      ...(discountObj && { discount: discountObj }),
+    };
+
+    // Handle images consistently (save file IDs just like createProduct)
+    if (files.length > 0) {
+      const newImages = files.map(file => file.id); // Save file IDs
+      updateData.images = [...existingImages, ...newImages]; // Append to existing IDs
+    } else {
+      updateData.images = existingImages;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    ).populate('category');
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      product: updatedProduct
     });
 
-    if (!updated) {
-      return res.status(404).json({ message: "Produto não encontrado" });
-    }
-
-    res.json(updated);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating product:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 };
 
