@@ -97,7 +97,9 @@ app.get('/', (req, res) => {
       },
       checkout: {
         createOrder: 'POST /api/checkout',
-        getBillingHistory: 'GET /api/checkout/history'
+        getBillingHistory: 'GET /api/checkout/history',
+        updateOrderStatus: 'PUT /api/checkout/:id',
+        getOrders: 'GET /api/checkout/orders'
       },
       files: {
         upload: 'POST /api/files/upload',
