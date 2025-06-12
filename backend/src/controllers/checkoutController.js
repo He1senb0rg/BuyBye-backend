@@ -154,3 +154,34 @@ export const getOrders = async (req, res) => {
     res.status(500).json({ message: 'Erro ao encontrar o histórico de faturamento.' });
   }
 };
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderStatus } = req.body;
+    const id = req.params.id;
+
+    if (!orderStatus || typeof orderStatus !== 'string') {
+      return res.status(400).json({ message: 'orderStatus is required and must be a string.' });
+    }
+
+    // Optional: define allowed statuses
+    const allowed = ['pending', 'paid', 'shipped', 'delivered'];
+    if (!allowed.includes(orderStatus)) {
+      return res.status(400).json({ message: `Invalid status. Allowed: ${allowed.join(', ')}` });
+    }
+
+    const updatedOrder = await Order.findByIdAndUpdate(
+      req.params.id,
+      { orderStatus },
+      { new: true }
+    );
+
+    if (!updatedOrder) {
+      return res.status(404).json({ message: 'Order not found' });
+    }
+
+    res.json(updatedOrder);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update order status', error: error.message });
+  }
+};
