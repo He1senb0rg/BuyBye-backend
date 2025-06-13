@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { protect } from "../middlewares/authMiddleware.js";
-import upload from "../config/gridfsStorage.js"; // GridFS multer storage
 
 import {
   getAllUsers,
@@ -15,7 +14,7 @@ const router = Router();
 
 router.get("/", protect, getAllUsers);
 router.get("/:id", protect, getUserById);
-router.put("/:id", protect, upload.single('file'), updateUser);
+router.put("/:id", protect, updateUser);
 router.delete("/:id", protect, deleteUser);
 router.put("/:id/image", protect, removeImage);
 router.put("/:id/password", protect, updatePassword);

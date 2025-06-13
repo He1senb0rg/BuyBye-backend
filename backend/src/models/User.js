@@ -23,9 +23,9 @@ const UserSchema = new Schema({
     default: null,
   },
   image: {
-    type: Types.ObjectId,
-    ref: "uploads.files",
-    default: null,
+    type: String,
+    default: "/assets/images/account-profile.png",
+    default: null
   },
   role: {
     type: String,
