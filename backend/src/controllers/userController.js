@@ -85,11 +85,6 @@ export async function updateUser(req, res) {
     user.role = role || user.role;
     user.phone = phone !== undefined ? phone : user.phone;
 
-    // Handle image upload
-    if (req.file) {
-      user.image = `/api/files/${req.file.filename}`; // Or the correct URL prefix you are using
-    }
-
     await user.save();
 
     res.json({ user });

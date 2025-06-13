@@ -88,6 +88,7 @@ export const getShopById = async (req, res) => {
 export const updateShop = async (req, res) => {
     try {
         delete req.body.user;
+        console.log('Updating shop with data:', req.body);
 
         const updated = await Shop.findByIdAndUpdate(req.params.id, req.body, { new: true });
         if (!updated) {
@@ -129,13 +130,14 @@ export const updateShopBanner = async (req, res) => {
             description,
             link,
             buttonText,
-            image: req.file ? `/api/files/${req.file.filename}` : shop.banner?.image || ''
+            //image: req.file ? `/api/files/${req.file.filename}` : shop.banner?.image || '' nao funciona
         };
 
         await shop.save();
 
         res.json(shop);
     } catch (error) {
+        console.log('Error updating shop banner:', error);
         res.status(500).json({ error: error.message });
     }
 };

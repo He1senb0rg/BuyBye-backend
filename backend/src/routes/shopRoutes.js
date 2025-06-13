@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { protect } from '../middlewares/authMiddleware.js';
-import upload from '../config/gridfsStorage.js'; // GridFS multer storage
 
 import {
   createShop,
@@ -18,6 +17,6 @@ router.get('/', getAllShops);
 router.get('/:id', getShopById);
 router.put('/:id', protect, updateShop);
 router.delete('/:id', protect, deleteShop);
-router.put('/:id/banner', protect, upload.single('file'), updateShopBanner);
+router.put('/:id/banner', protect, updateShopBanner);
 
 export default router;

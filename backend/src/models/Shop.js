@@ -16,8 +16,7 @@ const BannerSchema = new Schema(
       type: String,
     },
     image: {
-      type: Types.ObjectId,
-      ref: "uploads.files",
+      type: String
     },
   },
   { _id: false }
@@ -49,8 +48,7 @@ const ShopSchema = new Schema({
     type: BannerSchema,
   },
   logo: {
-    type: Types.ObjectId,
-    ref: "uploads.files",
+    type: String,
     required: true,
   },
   createdAt: {
