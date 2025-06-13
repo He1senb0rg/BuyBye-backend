@@ -6,13 +6,11 @@ export const createShop = async (req, res) => {
     try {
         const { userId, name, ownerName, phone, description, logo } = req.body;
 
-        // Verifica se o user existe
         const user = await User.findById(userId);
         if (!user) {
             return res.status(404).json({ message: 'Utilizador não encontrado' });
         }
 
-        // Cria a nova loja fofa
         const shop = await Shop.create({
             user: userId,
             name,
@@ -22,53 +20,52 @@ export const createShop = async (req, res) => {
             logo
         });
 
-         
         res.status(201).json(shop);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 // Listar todas as lojas
 export const getAllShops = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    const sortOption = req.query.sort;
-    const search = req.query.search || "";
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const sortOption = req.query.sort;
+        const search = req.query.search || "";
 
-    let sortBy = {};
-    switch (sortOption) {
-      case "nome_az":
-        sortBy = { name: 1 };
-        break;
-      case "nome_za":
-        sortBy = { name: -1 };
-        break;
-      case "mais_recente":
-        sortBy = { createdAt: -1 };
-        break;
-      case "mais_antigo":
-        sortBy = { createdAt: 1 };
-        break;
-      default:
-        sortBy = { createdAt: -1 };
-    }
+        let sortBy = {};
+        switch (sortOption) {
+            case "nome_az":
+                sortBy = { name: 1 };
+                break;
+            case "nome_za":
+                sortBy = { name: -1 };
+                break;
+            case "mais_recente":
+                sortBy = { createdAt: -1 };
+                break;
+            case "mais_antigo":
+                sortBy = { createdAt: 1 };
+                break;
+            default:
+                sortBy = { createdAt: -1 };
+        }
 
         const shops = await Shop.find({
-      name: { $regex: search, $options: "i" },
-    })
-      .sort(sortBy)
-      .skip(skip)
-      .limit(limit)
-      .populate('user');
-
-          const totalShops = await Shop.countDocuments({
             name: { $regex: search, $options: "i" },
-          });
+        })
+            .sort(sortBy)
+            .skip(skip)
+            .limit(limit)
+            .populate('user');
 
-        res.json({shops, totalShops });
+        const totalShops = await Shop.countDocuments({
+            name: { $regex: search, $options: "i" },
+        });
+
+        res.json({ shops, totalShops });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -87,11 +84,9 @@ export const getShopById = async (req, res) => {
     }
 };
 
-
 // Atualizar loja
 export const updateShop = async (req, res) => {
     try {
-        // Garantir que o id de utilizador não pode ser trocado
         delete req.body.user;
 
         const updated = await Shop.findByIdAndUpdate(req.params.id, req.body, { new: true });
@@ -100,11 +95,10 @@ export const updateShop = async (req, res) => {
         }
 
         res.json(updated);
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
 // Apagar loja
 export const deleteShop = async (req, res) => {
@@ -118,32 +112,29 @@ export const deleteShop = async (req, res) => {
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
-}
+};
 
-// editar banner da loja
+// Editar banner da loja
 export const updateShopBanner = async (req, res) => {
     try {
-        const { title, description, link, buttonText, image } = req.body;
+        const { title, description, link, buttonText } = req.body;
 
-        const updatedShop = await Shop.findByIdAndUpdate(
-            req.params.id,
-            {
-                banner: {
-                    title,
-                    description,
-                    link,
-                    buttonText,
-                    image
-                }
-            },
-            { new: true }
-        );
-
-        if (!updatedShop) {
+        const shop = await Shop.findById(req.params.id);
+        if (!shop) {
             return res.status(404).json({ message: 'Loja não encontrada' });
         }
 
-        res.json(updatedShop);
+        shop.banner = {
+            title,
+            description,
+            link,
+            buttonText,
+            image: req.file ? `/api/files/${req.file.filename}` : shop.banner?.image || ''
+        };
+
+        await shop.save();
+
+        res.json(shop);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

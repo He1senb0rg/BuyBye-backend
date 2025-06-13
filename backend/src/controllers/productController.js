@@ -3,13 +3,21 @@ import Cart from "../models/Cart.js";
 import Wishlist from "../models/Wishlist.js";
 import Review from "../models/Review.js";
 import Order from "../models/Order.js";
+import { mapImageIdsToUrls } from "../utils/fileHelpers.js";
 
-// Criar um novo produto
 export async function createProduct(req, res) {
   try {
-    const { name, description, price, stock, category, images, discount_type, discount_value } = req.body;
-    console.log(req.body);
-    const averageRating = 0;
+
+    let { name, description, price, stock, category, discount_type, discount_value } = req.body;
+
+    if (!name || !description || isNaN(price) || isNaN(stock) || !category) {
+      process.stdout.write(res.status(400).json({ error: "Missing or invalid required fields" }));
+      return res.status(400).json({ error: "Missing or invalid required fields" });
+    }
+
+    const images = req.files && req.files.length > 0
+      ? req.files.map(file => file.id)
+      : [];
 
     const productData = {
       name,
@@ -18,7 +26,7 @@ export async function createProduct(req, res) {
       stock,
       category,
       images,
-      averageRating,
+      averageRating: 0,
     };
 
     if (discount_type && discount_value !== "") {
@@ -34,8 +42,8 @@ export async function createProduct(req, res) {
 
     res.status(201).json({ product });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
-    console.error(error.message);
   }
 }
 
@@ -79,7 +87,15 @@ export const getAllProducts = async (req, res) => {
       name: { $regex: search, $options: "i" },
     });
 
-    res.json({ products, totalProducts });
+    // Map image IDs to URLs for each product
+    const productsWithImages = await Promise.all(
+      products.map(async (product) => {
+        const imagesWithUrls = await mapImageIdsToUrls(product.images);
+        return { ...product.toObject(), images: imagesWithUrls };
+      })
+    );
+
+    res.json({ products: productsWithImages, totalProducts });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -90,10 +106,7 @@ export const getProductById = async (req, res) => {
   try {
     const product = await Product.findById(req.params.id).populate({
       path: "reviews",
-      populate: {
-        path: "user",
-        select: "name",
-      },
+      populate: { path: "user", select: "name" },
     });
     if (!product) {
       return res.status(404).json({ message: "Produto não encontrado" });
@@ -101,25 +114,82 @@ export const getProductById = async (req, res) => {
 
     product.reviews.sort((a, b) => b.createdAt - a.createdAt);
 
-    res.json(product);
+    const imagesWithUrls = await mapImageIdsToUrls(product.images);
+
+    res.json({ ...product.toObject(), images: imagesWithUrls });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// Atualizar produto
+//Atualizar produto
 export const updateProduct = async (req, res) => {
   try {
-    const updated = await Product.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    
-    if (!updated) {
-      return res.status(404).json({ message: "Produto não encontrado" });
+    // Validate form data
+    if (!req.body || Object.keys(req.body).length === 0) {
+      return res.status(400).json({ error: "No form data received" });
     }
-    res.json(updated);
+
+    const { id } = req.params;
+    const { name, description, price, stock, category, discount } = req.body;
+    const files = req.files || [];
+
+    // Ensure existingImages is always an array
+    const existingImages = req.body.existingImages
+      ? Array.isArray(req.body.existingImages)
+        ? req.body.existingImages
+        : [req.body.existingImages]
+      : [];
+
+    // Parse discount if provided
+    let discountObj = null;
+    if (discount && typeof discount === 'string') {
+      try {
+        discountObj = JSON.parse(discount);
+      } catch (e) {
+        console.error('Error parsing discount:', e);
+      }
+    }
+
+    // Prepare update data
+    const updateData = {
+      name,
+      description,
+      price: parseFloat(price),
+      stock: parseInt(stock),
+      category,
+      ...(discountObj && { discount: discountObj }),
+    };
+
+    // Handle images consistently (save file IDs just like createProduct)
+    if (files.length > 0) {
+      const newImages = files.map(file => file.id); // Save file IDs
+      updateData.images = [...existingImages, ...newImages]; // Append to existing IDs
+    } else {
+      updateData.images = existingImages;
+    }
+
+    const updatedProduct = await Product.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    ).populate('category');
+
+    if (!updatedProduct) {
+      return res.status(404).json({ error: 'Product not found' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      product: updatedProduct
+    });
+
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error updating product:', error);
+    return res.status(500).json({
+      error: 'Internal server error',
+      message: error.message
+    });
   }
 };
 
@@ -128,7 +198,6 @@ export const deleteProduct = async (req, res) => {
   try {
     await Product.findByIdAndDelete(req.params.id);
 
-    // Remover o produto de todos os carrinhos, listas de desejos, avaliações e compras
     await Cart.deleteMany({ "items.product": req.params.id });
     await Wishlist.deleteMany({ product: req.params.id });
     await Review.deleteMany({ product: req.params.id });

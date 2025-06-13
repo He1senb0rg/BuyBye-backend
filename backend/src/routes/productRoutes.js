@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { protect } from '../middlewares/authMiddleware.js';
-const router = Router();
+import upload from '../config/gridfsStorage.js';
 import {
   createProduct,
   getAllProducts,
@@ -10,12 +10,13 @@ import {
   getAllProductsWithDiscount
 } from '../controllers/productController.js';
 
+const router = Router();
 
-router.post('/', protect, createProduct);
+router.post('/', protect, upload.array('files'), createProduct);
 router.get('/', getAllProducts);
 router.get('/sales', getAllProductsWithDiscount)
 router.get('/:id', getProductById);
-router.put('/:id', protect, updateProduct);
+router.put('/:id', protect, upload.array('files'), updateProduct);
 router.delete('/:id', protect, deleteProduct);
 
 export default router;
