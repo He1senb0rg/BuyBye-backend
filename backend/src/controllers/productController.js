@@ -209,3 +209,48 @@ export const deleteProduct = async (req, res) => {
     console.error(error);
   }
 };
+
+// Obter todos os produtos que têm desconto
+export const getAllProductsWithDiscount = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const sortOption = req.query.sort;
+
+    let sortBy = {};
+    switch (sortOption) {
+      case "nome_az":
+        sortBy = { name: 1 };
+        break;
+      case "nome_za":
+        sortBy = { name: -1 };
+        break;
+      case "mais_recente":
+        sortBy = { createdAt: -1 };
+        break;
+      case "mais_antigo":
+        sortBy = { createdAt: 1 };
+        break;
+      default:
+        sortBy = { createdAt: -1 };
+    }
+
+    const products = await Product.find({
+      discount: { $exists: true, $ne: null },
+    })
+      .sort(sortBy)
+      .skip(skip)
+      .limit(limit)
+      .populate("reviews")
+      .populate("category");
+
+    const totalProducts = await Product.countDocuments({
+      discount: { $exists: true, $ne: null },
+    });
+
+    res.json({ products, totalProducts });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
