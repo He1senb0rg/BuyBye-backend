@@ -125,7 +125,6 @@ export const getProductById = async (req, res) => {
 //Atualizar produto
 export const updateProduct = async (req, res) => {
   try {
-    // Validate form data
     if (!req.body || Object.keys(req.body).length === 0) {
       return res.status(400).json({ error: "No form data received" });
     }
@@ -134,14 +133,12 @@ export const updateProduct = async (req, res) => {
     const { name, description, price, stock, category, discount } = req.body;
     const files = req.files || [];
 
-    // Ensure existingImages is always an array
     const existingImages = req.body.existingImages
       ? Array.isArray(req.body.existingImages)
         ? req.body.existingImages
         : [req.body.existingImages]
       : [];
 
-    // Parse discount if provided
     let discountObj = null;
     if (discount && typeof discount === 'string') {
       try {
@@ -151,7 +148,6 @@ export const updateProduct = async (req, res) => {
       }
     }
 
-    // Prepare update data
     const updateData = {
       name,
       description,
@@ -161,10 +157,9 @@ export const updateProduct = async (req, res) => {
       ...(discountObj && { discount: discountObj }),
     };
 
-    // Handle images consistently (save file IDs just like createProduct)
     if (files.length > 0) {
-      const newImages = files.map(file => file.id); // Save file IDs
-      updateData.images = [...existingImages, ...newImages]; // Append to existing IDs
+      const newImages = files.map(file => file.id || file._id);
+      updateData.images = [...existingImages, ...newImages];
     } else {
       updateData.images = existingImages;
     }
@@ -179,9 +174,14 @@ export const updateProduct = async (req, res) => {
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    const imageUrls = await mapImageIdsToUrls(updatedProduct.images);
+
     return res.status(200).json({
       success: true,
-      product: updatedProduct
+      product: {
+        ...updatedProduct.toObject(),
+        images: imageUrls,
+      }
     });
 
   } catch (error) {

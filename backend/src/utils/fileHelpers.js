@@ -8,17 +8,18 @@ export async function mapImageIdsToUrls(imageIds) {
 
   const imagesWithUrls = await Promise.all(
     imageIds.map(async (img) => {
-      // If img is already a URL string, return it directly
       if (typeof img === "string" && (img.startsWith("http") || img.startsWith("/"))) {
-        return img;
+        return { url: img, id: img }; // You can keep the URL and treat it as its own ID if necessary
       }
 
-      // Otherwise, treat as ObjectId
       try {
         const id = typeof img === "string" ? img : img.toString();
         const fileDoc = await gfsFiles.findOne({ _id: new mongoose.Types.ObjectId(id) });
         if (!fileDoc) return null;
-        return `/api/files/${fileDoc.filename}`;
+        return {
+          url: `api/files/${fileDoc.filename}`,
+          id: fileDoc._id.toString(),
+        };
       } catch (err) {
         console.error("Failed to process image ID:", img, err);
         return null;
