@@ -7,16 +7,15 @@ const { compare, hash } = pkg2;
 // Registrar novo usuário
 export async function register(req, res) {
   try {
-    const { name, email, password, role } = req.body;
-    
+    const { name, email, password, role, phone } = req.body;
+
     const userExists = await User.findOne({ email });
     if (userExists) {
       return res.status(400).json({ error: 'Email já está em uso' });
     }
 
-    const user = await User.create({ name, email, password, role });
-    
-    // Remove a senha do retorno
+    const user = await User.create({ name, email, password, role, phone });
+
     user.password = undefined;
 
     res.status(201).json({ user });
@@ -43,7 +42,7 @@ export async function login(req, res) {
     const token = sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: '24h' }
     );
 
     res.json({ token, user: { id: user._id, name: user.name, email: user.email, role: user.role } });

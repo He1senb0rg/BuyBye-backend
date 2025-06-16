@@ -1,53 +1,127 @@
-import dotenv from 'dotenv';
-dotenv.config();
-import express, { json } from 'express';
-import { connect } from 'mongoose';
+import 'dotenv/config';
+import express from 'express';
 import morgan from 'morgan';
 import cors from 'cors';
+import connectDB from '../src/config/db.js';
+import { connectGridFS } from '../src/config/gridfs.js';
 
+// Routes
 import authRoutes from './routes/authRoutes.js';
+import dashboardRoutes from './routes/dashboardRoutes.js';
+import productRoutes from './routes/productRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import wishlistRoutes from './routes/wishlistRoutes.js';
+import categoryRoutes from './routes/categoryRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import checkoutRoutes from './routes/checkoutRoutes.js';
+import fileRoutes from './routes/fileRoutes.js';
+import shopRoutes from './routes/shopRoutes.js';
 
 const app = express();
 
 // Middleware
 app.use(cors());
-app.use(json());
+app.use(express.json());
 app.use(morgan('dev'));
 
+// MongoDB connection and GridFS initialization
+const startServer = async () => {
+  try {
+    // Connect to MongoDB
+    const conn = await connectDB();
 
-// Conexão com o MongoDB
-connect(process.env.MONGO_URI, {
-  auth: {
-    username: process.env.MONGO_USER,
-    password: process.env.MONGO_PASSWORD
-  },
-  authSource: "auth_db",
-  retryWrites: true,
-  w: "majority"
-})
-.then(() => console.log('Conectado ao MongoDB com sucesso!'))
-.catch(err => {
-  console.error('Erro na conexão com MongoDB:', err.message);
-  console.error('Stack trace:', err.stack);
-});
+    // Initialize GridFSBucket with the mongoose connection
+    connectGridFS(conn);
 
-  
-// Rota raiz
+    const PORT = process.env.PORT || 3000;
+    app.listen(PORT, () => {
+      console.log(`Servidor rodando na porta ${PORT}`);
+    });
+  } catch (err) {
+    console.error('Falha ao iniciar o servidor:', err.message);
+    process.exit(1); // Exit with failure
+  }
+};
+
+startServer();
+
+// Rota Raiz
 app.get('/', (req, res) => {
   res.json({
-    message: 'Bem-vindo à API de autenticação',
+    message: 'Bem-vindo à API da BuyBye!',
     endpoints: {
+      dashBoard: 'GET /api/dashboard/summary',
       register: 'POST /api/auth/register',
-      login: 'POST /api/auth/login'
+      login: 'POST /api/auth/login',
+      products: {
+        all: 'GET /api/products',
+        byId: 'GET /api/products/:id',
+        create: 'POST /api/products',
+        update: 'PUT /api/products/:id',
+        delete: 'DELETE /api/products/:id'
+      },
+      reviews: {
+        all: 'GET /api/reviews',
+        byId: 'GET /api/reviews/:id',
+        create: 'POST /api/reviews',
+        update: 'PUT /api/reviews/:id',
+        delete: 'DELETE /api/reviews/:id'
+      },
+      cart: {
+        getCart: 'GET /api/cart',
+        addItem: 'POST /api/cart',
+        updateItem: 'PUT /api/cart/:productId',
+        removeItem: 'DELETE /api/cart/:productId',
+        clearCart: 'DELETE /api/cart'
+      },
+      wishlist: {
+        addToWishlist: 'POST /api/wishlist',
+        removeFromWishlist: 'DELETE /api/wishlist',
+        getWishlist: 'GET /api/wishlist',
+        checkIfInWishlist: 'GET /api/wishlist/:productId'
+      },
+      categories: {
+        all: 'GET /api/categories',
+        byId: 'GET /api/categories/:id',
+        create: 'POST /api/categories',
+        update: 'PUT /api/categories/:id',
+        delete: 'DELETE /api/categories/:id'
+      },
+      users: {
+        all: 'GET /api/users',
+        byId: 'GET /api/users/:id',
+        create: 'POST /api/users',
+        update: 'PUT /api/users/:id',
+        delete: 'DELETE /api/users/:id',
+        removeImage: 'PUT /api/users/:id/image',
+        updatePassword: 'PUT /api/users/:id/password'
+      },
+      checkout: {
+        createOrder: 'POST /api/checkout',
+        getBillingHistory: 'GET /api/checkout/history',
+        updateOrderStatus: 'PUT /api/checkout/:id',
+        getOrders: 'GET /api/checkout/orders'
+      },
+      files: {
+        upload: 'POST /api/files/upload',
+        getFile: 'GET /api/files/:filename'
+      }
     }
   });
 });
 
-
-// Rotas da API
+// API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/categories', categoryRoutes);
+app.use('/api/checkout', checkoutRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/files', fileRoutes);
+app.use('/api/shop', shopRoutes);
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+export default app;

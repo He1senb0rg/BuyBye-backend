@@ -1,164 +1,327 @@
-# Final Project
-## Programação para Web e Desenvolvimento de Software para a Nuvem
+# BuyBye Backend
+## Projeto Programação para Web e Desenvolvimento de Software para a Nuvem
 
 ### Backend application NodeJS + ExpressJS + MongoDB.
 
 
 [![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](https://choosealicense.com/licenses/mit/) [![Node.js](https://img.shields.io/badge/Node.js-18-green?logo=node.js)](https://nodejs.org/) [![Express.js](https://img.shields.io/badge/Express.js-4.18-black?logo=express)](https://expressjs.com/) [![MongoDB](https://img.shields.io/badge/MongoDB-7.0-green?logo=mongodb)](https://www.mongodb.com/) [![Docker](https://img.shields.io/badge/Docker-24.0-blue?logo=docker)](https://www.docker.com/) [![Version](https://img.shields.io/badge/Version-1.0-blue)](https://semver.org/)
 
-
-1. Clone este repositório em sua máquina usando o seguinte comando:
-```bash
-git clone git@github.com:StorThiago/dsa-backend.git
-```
-
-
-2. Entre no repositório clonado
-```bash
-cd dsa-backend/
-```
-
-
-3. Crie o arquivo `.env` que armazena variáveis sensíveis/configuration a partir do exemplo:
-```bash
-cd dsa-backend/backend/ && cp .env.example .env
-```
-
-
-4. Crie a network caso não exista
-```bash
-docker network create --driver bridge dsa-network
-```
-
-
-5. Setting as variáveis de ambiente (nome da base, user e pass do user da sua app) e acesso ao Mongo em:
-```bash
-- MONGO_INITDB_DATABASE=
-- MONGO_INITDB_ROOT_PASSWORD=
-- MONGO_INITDB_PASSWORD=
-```
-
-
-6. No diretório raiz do projeto, execute o seguinte comando para instalar as dependências:
-```bash
-docker-compose up -d --build
-```
-
-
-7. A aplicação está ouvindo em:
+A aplicação ouve em:
 http://localhost:3000/
 
 
-8. API References
-Registar novo usuário
+## Referências API
+
+### Autenticação
+
+Registar novo utilizador
+
 ```html
 POST /api/auth/register
 ```
+
 ```json
 {
-  "name": "Usuario Teste",
-  "email": "teste@email.com",
-  "password": "senhaSegura123"
+  "name": "Cão Baloiço",
+  "email": "caoauau@email.com",
+  "password": "SportingCampeao2"
 }
 ```
 
 Fazer login
+
 ```html
 POST /api/auth/register
 ```
+
 ```json
 {
-  "email": "teste@example.com",
-  "password": "123456"
+  "email": "pato@email.com",
+  "password": "123321"
 }
 ```
 
-## Folder struture
+### Produtos
+
+Listar todos os produtos
+
+```html
+GET /api/products
+```
+
+```json
+{
+  "page": "1",
+  "limit": "10",
+  "sort": "nome_az", // Ordenar pelo nome de A a Z
+  "search": "",
+}
+```
+
+Criar um novo produto
+
+```html
+POST /api/products
+```
+
+```json
+{
+  "name": "Mala Bonita Bué Gira e Estilosa",
+  "description": "Esta mala é bué linda, nunca mais vais precisar de outra mala",
+  "price": 49.99,
+  "stock": 20,
+  "category": "", // Id de uma categoria existente
+  "images": ["caminho/para/a/imagem1", "caminho/para/a/imagem2"]
+}
+```
+
+Obter um produto pelo seu ID
+
+```html
+GET /api/products/:id
+```
+
+Atualizar um produto pelo seu ID
+
+```html
+PUT /api/products/:id
+```
+
+```json
+{
+  "name": "Mala Lindona e Fofinha",
+  "description": "Mala bué fofa e estilosa e fixe e bacana"
+}
+```
+
+Apagar um produto pelo seu ID
+
+```html
+DELETE /api/products/:id
+```
+
+### Avaliações
+
+Listar todas as avaliações
+
+```html
+GET /api/reviews
+```
+
+Criar uma nova avaliação
+
+```html
+POST /api/reviews
+```
+
+```json
+{
+  "productId": "", // Id de um produto existente
+  "rating": 4,
+  "comment": "Adorei o produto muito bom!!!!!",
+}
+```
+
+Obter uma acaliação pelo seu ID
+
+```html
+GET /api/reviews/:id
+```
+
+Atualizar uma avaliação pelo seu ID
+
+```html
+PUT /api/reviews/:id
+```
+
+```json
+{
+  "rating": 3,
+}
+```
+
+Apagar uma avaliação pelo seu ID
+
+```html
+DELETE /api/reviews/:id
+```
+
+Listar todas as avaliação de um produto pelo seu ID
+
+```html
+GET /api/reviews/product/:id
+```
+
+Listar todas as avaliação de um utilizador pelo seu ID
+
+```html
+GET /api/reviews/user/:id
+```
+
+Listar todas as avaliação que um utilizador escreveu num produto
+
+```html
+GET /api/reviews/user/:userId/product/:productId
+```
+
+Listar a soma da quantidade de estrelas de cada avaliação num produto
+
+```html
+GET /api/reviews/product/:id/stats
+```
+
+### Categorias
+
+Listar todas as categorias
+
+```html
+GET /api/categories
+```
+
+```json
+{
+  "page": "1",
+  "limit": "20",
+  "sort": "mais_recente",
+  "search": "Roupa",
+}
+```
+
+Criar uma nova categoria
+
+```html
+POST /api/categories
+```
+
+```json
+{
+  "name": "Roupa Desportiva",
+  "description": "A melhor roupa desportiva do universo",
+}
+```
+
+Obter uma categoria pelo seu ID
+
+```html
+GET /api/categories/:id
+```
+
+Atualizar uma categoria pelo seu ID
+
+```html
+PUT /api/categories/:id
+```
+
+```json
+{
+  "description": "Roupa para praticar desporto"
+}
+```
+
+Apagar uma categoria pelo seu ID
+
+```html
+DELETE /api/categories/:id
+```
+
+### Utilizadores
+
+Listar todos os utilizadores
+
+```html
+GET /api/users
+```
+
+```json
+{
+  "page": "1",
+  "limit": "20",
+  "sort": "nome_za", // Ordenar pelo nome de Z a A
+  "search": "",
+}
+```
+
+Obter um utilizador pelo seu ID
+
+```html
+GET /api/users/:id
+```
+
+Atualizar um utilizador pelo seu ID
+
+```html
+PUT /api/users/:id
+```
+
+```json
+{
+  "name": "Estagiário Novo",
+  "role": "Admin"
+}
+```
+
+Apagar um utilizador pelo seu ID
+
+```html
+DELETE /api/users/:id
+```
+
+Remover a imagem de um utilizador pelo seu ID
+
+```html
+PUT /api/users/:id/image
+```
+
+## Estrutura da Pasta do Projeto
 
 ```bash
 dsa-backend/
 ├── docker-compose.yml
 ├── backend/
-│   ├── Dockerfile
-│   ├── package.json
 │   ├── src/
-│   │   ├── app.js
-│   │   ├── models/
-│   │   │   └── User.js
+│   │   ├── config/
+│   │   │   └── db.js
 │   │   ├── controllers/
-│   │   │   └── authController.js
+│   │   │   ├── authController.js
+│   │   │   ├── cartController.js
+│   │   │   ├── categoryController.js
+│   │   │   ├── checkoutController.js
+│   │   │   ├── productController.js
+│   │   │   ├── reviewController.js
+│   │   │   ├── userController.js
+│   │   │   └── wishlistController.js
+│   │   ├── middlewares/
+│   │   │   └── authMiddleware.js
+│   │   ├── models/
+│   │   │   ├── Cart.js
+│   │   │   ├── Category.js
+│   │   │   ├── Order.js
+│   │   │   ├── Product.js
+│   │   │   ├── Review.js
+│   │   │   ├── User.js
+│   │   │   └── Wishlist.js
 │   │   ├── routes/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── cartRoutes.js
+│   │   │   ├── categoryRoutes.js
+│   │   │   ├── checkoutRoutes.js
+│   │   │   ├── productRoutes.js
+│   │   │   ├── reviewRoutes.js
+│   │   │   ├── userRoutes.js
 │   │   │   └── authRoutes.js
-│   │   └── config/
-│   │       └── db.js
-│   └── .env
-└── mongo-init.js
+│   │   ├── utils/
+│   │   │   └── updateProductRating.js
+│   │   └── app.js
+│   ├── .env
+│   ├── Dockerfile
+│   └── package.json
+├── .gitattributes
+├── docker-compose.yml
+├── mongo-init.js
+└── README.md
 ```
 
-
-```bash
-dsa-backend/
-├── docker-compose.yml          # Configuração do ambiente Docker
-├── backend/                    # Pasta do aplicativo Node.js
-└── mongo-init.js               # Script de inicialização do MongoDB
-```
-
-
-## Arquivos Raiz
-### docker-compose.yml
-- **Função**: Orquestra os containers Docker (Node.js + MongoDB)
-- **Contém**:
-  - Definição de serviços (backend e MongoDB)
-  - Configurações de rede, volumes e variáveis de ambiente
-- **Importância**: Permite rodar todo o ambiente com um único comando (docker-compose up)
-
-
-### mongo-init.js
-- **Função**: Script executado quando o MongoDB inicia pela primeira vez
-- **O que faz**:
-  - Cria usuários e permissões
-  - Inicializa coleções necessári
-
-
-## Pasta backend/ (Aplicação Node.js)
-### Dockerfile
-- **Função**: "Receita" para construir a imagem Docker do backend
-- **Contém**:
-  - Base image (ex: node:18-alpine)
-  - Instalação de dependências
-  - Comando de inicialização (npm start)
-
-
-### package.json
-- **Função**: Manifesto do projeto Node.js
-- **Contém**:
-  - Dependências (express, mongoose, etc.)
-  - Scripts (start, dev, test)
-
-
-## Pasta src/ (Código Fonte)
-
-
-### app.js
-entry point of the application. Add your endpoints / routes
-- **Função**: Arquivo principal da aplicação
-- **Responsabilidades**:
-  - Configuração do Express
-  - Conexão com o MongoDB
-  - Middlewares globais (CORS, JSON parsing)
-  - Inicialização do servidor
-
-
-| Pasta   | Função       | Ficheiro Exemplo                           |
-| :---------- | :--------- | :---------------------------------- |
-| `models/` | `Define a estrutura dos dados (Mongoose schemas)` | `User.js` |
-| `controllers/` | `Lógica de negócio (manipulação de dados)` | `authController.js` |
-| `routes/` | `Definição dos endpoints da API  ` | `authRoutes.js` |
-| `config/` | `Configurações globais (banco de dados, autenticação)` | `db.js` |
-
-
-
-## Documentation
+## Documentação
 
 [Express JS](https://expressjs.com/)
 
@@ -171,5 +334,6 @@ entry point of the application. Add your endpoints / routes
 
 ## Autores
 
-- [@StorThiago](https://www.github.com/StorThiago)
-- [@joaomatosiscte](https://www.github.com/joaomatosiscte)
+- [@He1senb0rg](https://github.com/He1senb0rg)
+- [@william-217](https://github.com/william-217)
+- [@fgiwp](https://github.com/fgiwp)
